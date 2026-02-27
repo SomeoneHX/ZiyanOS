@@ -1,0 +1,1 @@
+indeployqt ZiyanOS.exe --qmldir E:\BaoHaoxun\ZiyanOS\src\resources\qml --no-translations --no-virtualkeyboard

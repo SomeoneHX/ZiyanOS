@@ -1,0 +1,30 @@
+# 构建输出目录
+build/
+*-build/
+
+# Qt Creator 相关
+.qtcreator/
+*.pro.user
+*.pro.user.*
+CMakeLists.txt.user
+*.autosave
+
+# 编译中间文件
+*.o
+*.obj
+*.exe
+*.dll
+*.lib
+*.a
+*.moc
+*.moc.*
+*.qrc.dep
+*.qrc.*
+*.qm
+
+# IDE 临时文件
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

@@ -1,0 +1,150 @@
+import QtQuick
+import QtQuick.Controls
+import Qt5Compat.GraphicalEffects
+import ZiyanOS.SystemUtils 1.0
+import ZiyanOS.SettingsManager
+
+ApplicationWindow {
+    id: powerWindow
+    width: Screen.width
+    height: Screen.height
+    visible: false
+    flags: Qt.FramelessWindowHint
+    title: "电源菜单"
+
+    signal windowClosing()
+    signal requestDesktopClose()
+    signal cancelled()
+
+    SystemUtils { id: systemUtils }
+    SettingsManager { id: settingsManager }
+
+    property string desktopBackground: settingsManager.desktopBackground
+    property string desktopWallpaper: settingsManager.desktopWallpaper
+    property int blurRadius: 16
+    property bool hasPecmdIni: systemUtils.hasPecmdIni()
+
+    // 标志：是否由取消按钮触发关闭
+    property bool __cancelledByUser: false
+
+    // 背景（高斯模糊 + 遮罩）
+    Rectangle {
+        anchors.fill: parent
+        color: desktopWallpaper === "" ? desktopBackground : "transparent"
+        Item {
+            anchors.fill: parent
+            visible: desktopWallpaper !== ""
+            Image {
+                id: wallpaperImage
+                anchors.fill: parent
+                source: desktopWallpaper
+                fillMode: Image.PreserveAspectCrop
+                visible: false
+            }
+            GaussianBlur {
+                anchors.fill: parent
+                source: wallpaperImage
+                radius: blurRadius
+                samples: blurRadius * 2
+            }
+        }
+        Rectangle {
+            anchors.fill: parent
+            color: "#80000000"
+        }
+    }
+
+    // 顶部标题
+    Text {
+        anchors { top: parent.top; topMargin: 60; horizontalCenter: parent.horizontalCenter }
+        text: "电源菜单"
+        color: "white"
+        font.pixelSize: 36
+        font.bold: true
+    }
+
+    // 底部按钮区域
+    Column {
+        anchors { bottom: parent.bottom; bottomMargin: 40; horizontalCenter: parent.horizontalCenter }
+        spacing: 20
+
+        Text {
+            text: hasPecmdIni ? "关机、重启将丢失未保存数据" : "非字研内核，关闭桌面"
+            color: hasPecmdIni ? "white" : "#3498db"
+            font.pixelSize: 14
+            font.bold: true
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        Row {
+            spacing: 20
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            // 重启按钮
+            Rectangle {
+                width: 120; height: 45
+                color: hasPecmdIni ? "#f39c12" : "#3498db"
+                radius: 8
+                Text { text: "重启"; color: "white"; font.pixelSize: 16; font.bold: true; anchors.centerIn: parent }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: parent.color = hasPecmdIni ? "#d68910" : "#2980b9"
+                    onExited: parent.color = hasPecmdIni ? "#f39c12" : "#3498db"
+                    onClicked: {
+                        if (hasPecmdIni) systemUtils.rebootWithCommand()
+                        else powerWindow.requestDesktopClose()
+                    }
+                }
+            }
+
+            // 关机按钮
+            Rectangle {
+                width: 120; height: 45
+                color: hasPecmdIni ? "#e74c3c" : "#3498db"
+                radius: 8
+                Text { text: "关机"; color: "white"; font.pixelSize: 16; font.bold: true; anchors.centerIn: parent }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: parent.color = hasPecmdIni ? "#c0392b" : "#2980b9"
+                    onExited: parent.color = hasPecmdIni ? "#e74c3c" : "#3498db"
+                    onClicked: {
+                        if (hasPecmdIni) systemUtils.shutdownWithCommand()
+                        else powerWindow.requestDesktopClose()
+                    }
+                }
+            }
+
+            // 取消按钮
+            Rectangle {
+                width: 120; height: 45
+                color: "#95a5a6"
+                radius: 8
+                Text { text: "取消"; color: "white"; font.pixelSize: 16; font.bold: true; anchors.centerIn: parent }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: parent.color = "#7f8c8d"
+                    onExited: parent.color = "#95a5a6"
+                    onClicked: {
+                        __cancelledByUser = true
+                        cancelled()
+                        powerWindow.close()
+                    }
+                }
+            }
+        }
+    }
+
+    Component.onCompleted: settingsManager.loadSettings()
+
+    onClosing: (close) => {
+        // 如果不是由取消按钮触发的关闭（例如 Alt+F4），也视为取消
+        if (!__cancelledByUser) {
+            cancelled()
+        }
+        windowClosing()
+        close.accepted = true
+    }
+}
