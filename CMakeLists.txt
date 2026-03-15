@@ -18,33 +18,34 @@ find_package(Qt6 REQUIRED COMPONENTS
 # 启用Qt的CMake集成
 qt_standard_project_setup(REQUIRES 6.8)
 
-# 检查CURL文件是否存在
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include/curl/curl.h")
-    message(WARNING "CURL头文件未找到在: ${CMAKE_CURRENT_SOURCE_DIR}/include/curl/curl.h")
-else()
-    message(STATUS "找到CURL头文件: ${CMAKE_CURRENT_SOURCE_DIR}/include/curl/curl.h")
+# ------------------------------------------------------------------
+# curl 子模块构建配置
+# ------------------------------------------------------------------
+
+# 检查子模块是否存在（若不存在则提示用户初始化）
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/curl/CMakeLists.txt")
+    message(FATAL_ERROR
+        "curl submodule not found. Please run:\n"
+        "  git submodule update --init --recursive"
+    )
 endif()
 
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/libcurl.lib")
-    message(WARNING "libcurl.lib未找到在: ${CMAKE_CURRENT_SOURCE_DIR}/lib/libcurl.lib")
-else()
-    message(STATUS "找到libcurl.lib: ${CMAKE_CURRENT_SOURCE_DIR}/lib/libcurl.lib")
-endif()
+# 设置 curl 构建选项（根据需求调整）
+set(CURL_USE_SCHANNEL ON  CACHE BOOL "使用 Windows 原生 SSL (Schannel)" FORCE)   # Windows 内置 SSL，无需 OpenSSL
+set(CURL_DISABLE_LDAP  ON  CACHE BOOL "禁用 LDAP" FORCE)
+set(CURL_DISABLE_TELNET ON CACHE BOOL "禁用 Telnet" FORCE)
+set(CURL_DISABLE_POP3  ON  CACHE BOOL "禁用 POP3" FORCE)
+set(CURL_DISABLE_IMAP  ON  CACHE BOOL "禁用 IMAP" FORCE)
+set(CURL_DISABLE_SMTP  ON  CACHE BOOL "禁用 SMTP" FORCE)
+set(CURL_DISABLE_RTSP  ON  CACHE BOOL "禁用 RTSP" FORCE)
+set(CURL_USE_LIBPSL     OFF CACHE BOOL "不使用 LIBPSL" FORCE)
+set(CURL_STATICLIB     OFF CACHE BOOL "构建动态库 (DLL)" FORCE)                   # 与原预编译库一致，动态链接
+# 若需要静态链接，可将上面改为 ON，并移除后续 DLL 复制步骤
 
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/libcurl.dll")
-    message(WARNING "libcurl.dll未找到在: ${CMAKE_CURRENT_SOURCE_DIR}/lib/libcurl.dll")
-else()
-    message(STATUS "找到libcurl.dll: ${CMAKE_CURRENT_SOURCE_DIR}/lib/libcurl.dll")
-endif()
+# 添加 curl 子目录
+add_subdirectory(third_party/curl)
 
-# 添加CURL为导入库（仅当文件存在时）
-add_library(libcurl SHARED IMPORTED)
-
-set_target_properties(libcurl PROPERTIES
-    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libcurl.lib"
-    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libcurl.dll"
-)
-
+# ------------------------------------------------------------------
 # 收集所有C++源文件
 set(CPP_SOURCES
     src/modules/filesystem/filesystem.cpp
@@ -78,50 +79,36 @@ add_executable(ZiyanOS
 qt_add_qml_module(ZiyanOS
     URI ZiyanOS
     VERSION 1.0
-
-    # 设置输出目录
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ZiyanOS
-
-    # QML文件 - 直接列出
     QML_FILES
         # 主桌面
         src/resources/qml/Desktop.qml
-
-        # 新增：锁屏界面和主控制器
+        # 锁屏界面和主控制器
         src/resources/qml/LockScreen.qml
         src/resources/qml/WindowManager.qml
         src/resources/qml/PowerWindow.qml
-
         # 通用组件
         src/resources/qml/components/DesktopIcon.qml
         src/resources/qml/components/ZiyanWindow.qml
         src/resources/qml/components/FilePicker.qml
-
         # 应用：计算器
         src/resources/qml/apps/calculator/CalculatorWindow.qml
         src/resources/qml/apps/calculator/CalculatorButton.qml
-
         # 应用：文本编辑器
         src/resources/qml/apps/texteditor/TextEditor.qml
-
         # 应用：图片查看器
         src/resources/qml/apps/imageviewer/ImageViewer.qml
-
         # 应用：音乐播放器
         src/resources/qml/apps/musicplayer/MusicPlayer.qml
-
         # 应用：视频播放器
         src/resources/qml/apps/videoplayer/VideoPlayer.qml
-
         # 应用：网页浏览器
         src/resources/qml/apps/browser/BrowserWindow.qml
         src/resources/qml/apps/browser/WelcomePage.qml
         src/resources/qml/apps/browser/ErrorPage.qml
         src/resources/qml/apps/browser/MaintenancePage.qml
-
         # 应用：文件浏览器
         src/resources/qml/apps/filebrowser/FileBrowserWindow.qml
-
         # 应用：设置
         src/resources/qml/apps/settings/SettingsWindow.qml
         src/resources/qml/apps/settings/AboutPage.qml
@@ -129,29 +116,21 @@ qt_add_qml_module(ZiyanOS
         src/resources/qml/apps/settings/WindowSettingsPage.qml
         src/resources/qml/apps/settings/ResolutionPage.qml
         src/resources/qml/apps/settings/NetworkPage.qml
-
         # 应用：下载管理器
         src/resources/qml/apps/downloadmanager/DownloadManagerWindow.qml
-
         # 应用：Windows兼容层
         src/resources/qml/apps/winecompat/WineCompatLayer.qml
-
         # 应用：彩蛋
         src/resources/qml/apps/easteregg/EasterEggWindow.qml
-
     RESOURCES
-        # logo
         src/resources/assets/logo.png
         src/resources/assets/logo_animation.gif
-        # 感谢
         src/resources/assets/hwl.png
-        # 字体文件
         src/resources/fonts/NotoColorEmoji.ttf
         src/resources/fonts/SourceHanSansSC-Medium-2.otf
 )
 
-# 设置包含目录 - 关键修改！
-# 添加${CMAKE_CURRENT_SOURCE_DIR}/include目录，这样#include <curl/curl.h>就能正确找到文件
+# 设置包含目录（已移除手动添加的 include/curl 路径，因为 curl 目标会自动处理）
 target_include_directories(ZiyanOS PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/filesystem
@@ -162,10 +141,9 @@ target_include_directories(ZiyanOS PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/logging
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/wallpaper
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/network
-    ${CMAKE_CURRENT_SOURCE_DIR}/include  # 这一行是关键！添加项目根目录的include文件夹
 )
 
-# 链接Qt库和CURL库
+# 链接Qt库和CURL库（使用 CURL::libcurl 目标）
 target_link_libraries(ZiyanOS
     PRIVATE
         Qt6::Core
@@ -174,36 +152,29 @@ target_link_libraries(ZiyanOS
         Qt6::Gui
         Qt6::Multimedia
         Qt6::WebEngineQuick
-        libcurl  # 添加CURL库
+        CURL::libcurl          # 替换原有的 libcurl
 )
 
-# Windows特定的链接库
+# Windows特定的链接库（curl 自身已处理依赖，但保留原有链接项无妨）
 if(WIN32)
     target_link_libraries(ZiyanOS PRIVATE
         ws2_32     # Winsock
         crypt32    # Crypto API
     )
 
-    # 先获取主项目的输出目录
-    get_target_property(MAIN_TARGET_OUTPUT_DIR ZiyanOS RUNTIME_OUTPUT_DIRECTORY)
-    if(NOT MAIN_TARGET_OUTPUT_DIR)
-        # 如果未设置，使用默认目录
-        set(MAIN_TARGET_OUTPUT_DIR "${CMAKE_BINARY_DIR}")
+    # 复制 curl DLL 到输出目录（仅在动态库构建时）
+    if(NOT CURL_STATICLIB)
+        add_custom_command(TARGET ZiyanOS POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:CURL::libcurl>"          # 生成器表达式，展开为 DLL 的完整路径
+            "$<TARGET_FILE_DIR:ZiyanOS>/"
+            COMMENT "Copying curl DLL to output directory"
+        )
     endif()
-
-    message(STATUS "主程序输出目录: ${MAIN_TARGET_OUTPUT_DIR}")
 
     # 设置Windows子系统
     set_target_properties(ZiyanOS PROPERTIES
         WIN32_EXECUTABLE TRUE
-    )
-
-    # 复制CURL dll到构建目录（后处理命令）
-    add_custom_command(TARGET ZiyanOS POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_CURRENT_SOURCE_DIR}/lib/libcurl.dll"
-        $<TARGET_FILE_DIR:ZiyanOS>/
-        COMMENT "Copying libcurl.dll to output directory"
     )
 endif()
 
