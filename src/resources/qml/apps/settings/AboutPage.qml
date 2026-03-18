@@ -18,15 +18,15 @@ Item {
         // Logo容器
         Item {
             id: logoContainer
-            width: 280
-            height: 120
+            width: 360
+            height: 150
             anchors.horizontalCenter: parent.horizontalCenter
 
             Rectangle {
                 id: logoBackground
                 anchors.centerIn: parent
-                width: 280
-                height: 120
+                width: 360
+                height: 150
                 radius: 15
                 color: "Black"
                 z: 0
@@ -35,8 +35,8 @@ Item {
             AnimatedImage {
                 id: bootAnimation
                 source: "qrc:/qt/qml/ZiyanOS/src/resources/assets/logo_animation.gif"
-                width: 200
-                height: 200
+                width: 300
+                height: 130
                 anchors.centerIn: parent
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -61,16 +61,6 @@ Item {
                 source: logoBackground
                 z: -1
             }
-        }
-
-        // 应用名称
-        Text {
-            text: "字研OS"
-            color: "#2c3e50"
-            font.pixelSize: 28
-            font.bold: true
-            font.family: "Microsoft YaHei"
-            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         // 版本信息 - 可点击，用于触发彩蛋
@@ -105,7 +95,7 @@ Item {
 
             Text {
                 id: versionText
-                text: "UI版本 1.2.1\n内核版本 11-260226"
+                text: "版本 NEXT 2.0\n开发版本"
                 color: "#7f8c8d"
                 font.pixelSize: 16
             }

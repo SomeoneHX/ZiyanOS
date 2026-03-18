@@ -16,11 +16,5 @@
         "file": "ocean.jpg",
         "id": "ocean",
         "name": "大海"
-    },
-    {
-        "description": "字研操作系统",
-        "file": "ZiyanOS.jpg",
-        "id": "ZiyanOS",
-        "name": "ZiyanOS"
     }
 ]
