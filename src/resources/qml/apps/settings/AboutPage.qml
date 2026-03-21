@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
+import ZiyanOS.Apps 1.0
 
 Item {
     id: aboutPage
@@ -131,7 +132,7 @@ Item {
             }
         }
 
-        // ========= 新增：感谢支持区域 =========
+        // ========= 感谢支持区域 =========
         Rectangle {
             width: 200
             height: 1
@@ -207,12 +208,10 @@ Item {
                     }
                 }
             }
-
-            // 可在此继续添加其他条目...
         }
         // ======================================
 
-        // 新增：开源协议区域
+        // 开源协议区域
         Rectangle {
             width: 200
             height: 1
@@ -259,18 +258,17 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            // 使用从C++暴露的变量
                             var filePath = applicationDirPath + "/licenses/" + modelData.file
-
                             console.log("打开协议文件:", filePath)
 
-                            if (typeof desktop !== 'undefined') {
-                                desktop.createApplicationWindow("texteditor", {
+                            // 使用应用管理器启动文本编辑器
+                            if (typeof AppRegistry !== 'undefined') {
+                                AppRegistry.launchApp("texteditor", {
                                     filePath: filePath,
                                     readOnly: true
                                 })
                             } else {
-                                console.warn("desktop 未定义，无法打开协议文件")
+                                console.warn("AppRegistry 未定义，无法打开协议文件")
                             }
                         }
                     }

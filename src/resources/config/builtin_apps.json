@@ -1,0 +1,102 @@
+[
+    {
+        "id": "browser",
+        "name": "浏览器",
+        "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/browser.png",
+        "launchType": "qml",
+        "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/browser/BrowserWindow.qml",
+        "categories": ["internet"],
+        "defaultSize": {"width": 1024, "height": 768},
+        "isSystemApp": true
+    },
+    {
+        "id": "filebrowser",
+        "name": "文件浏览器",
+        "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/folder.png",
+        "launchType": "qml",
+        "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/filebrowser/FileBrowserWindow.qml",
+        "categories": ["system"],
+        "defaultSize": {"width": 800, "height": 600},
+        "isSystemApp": true
+    },
+    {
+        "id": "calculator",
+        "name": "计算器",
+        "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/calculator.png",
+        "launchType": "qml",
+        "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/calculator/CalculatorWindow.qml",
+        "categories": ["utilities"],
+        "defaultSize": {"width": 400, "height": 500},
+        "isSystemApp": true
+    },
+    {
+        "id": "texteditor",
+        "name": "文本编辑器",
+        "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/texteditor.png",
+        "launchType": "qml",
+        "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/texteditor/TextEditor.qml",
+        "categories": ["utilities"],
+        "defaultSize": {"width": 600, "height": 400},
+        "isSystemApp": true
+    },
+    {
+        "id": "imageviewer",
+        "name": "图片查看器",
+        "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/imageviewer.png",
+        "launchType": "qml",
+        "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/imageviewer/ImageViewer.qml",
+        "categories": ["multimedia"],
+        "defaultSize": {"width": 800, "height": 600},
+        "isSystemApp": true
+    },
+    {
+        "id": "musicplayer",
+        "name": "音乐播放器",
+        "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/musicplayer.png",
+        "launchType": "qml",
+        "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/musicplayer/MusicPlayer.qml",
+        "categories": ["multimedia"],
+        "defaultSize": {"width": 600, "height": 500},
+        "isSystemApp": true
+    },
+    {
+        "id": "videoplayer",
+        "name": "视频播放器",
+        "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/videoplayer.png",
+        "launchType": "qml",
+        "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/videoplayer/VideoPlayer.qml",
+        "categories": ["multimedia"],
+        "defaultSize": {"width": 800, "height": 600},
+        "isSystemApp": true
+    },
+    {
+        "id": "downloadmanager",
+        "name": "下载管理器",
+        "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/downloadmanager.png",
+        "launchType": "qml",
+        "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/downloadmanager/DownloadManagerWindow.qml",
+        "categories": ["utilities"],
+        "defaultSize": {"width": 700, "height": 500},
+        "isSystemApp": true
+    },
+    {
+        "id": "settings",
+        "name": "设置",
+        "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/settings.png",
+        "launchType": "qml",
+        "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/settings/SettingsWindow.qml",
+        "categories": ["system"],
+        "defaultSize": {"width": 800, "height": 600},
+        "isSystemApp": true
+    },
+    {
+        "id": "easteregg",
+        "name": "彩蛋",
+        "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/easteregg.png",
+        "launchType": "qml",
+        "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/easteregg/EasterEggWindow.qml",
+        "categories": ["fun"],
+        "defaultSize": {"width": 400, "height": 300},
+        "isSystemApp": true
+    }
+]

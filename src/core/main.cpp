@@ -16,6 +16,7 @@
 #include "LogManager.h"
 #include "WallpaperManager.h"
 #include "network.h"
+#include "appregistry.h"
 
 int main(int argc, char *argv[])
 {
@@ -108,6 +109,9 @@ int main(int argc, char *argv[])
     // 14. 创建 QML 引擎
     QQmlApplicationEngine engine;
 
+    // 设置 QML 引擎给 AppRegistry
+    AppRegistry::setQmlEngine(&engine);
+
     // 15. 连接QML引擎到日志管理器以捕获QML错误
     LogManager::instance()->setQmlEngine(&engine);
 
@@ -158,6 +162,13 @@ int main(int argc, char *argv[])
     qmlRegisterType<WallpaperManager>("ZiyanOS.WallpaperManager", 1, 0, "WallpaperManager");
     qmlRegisterType<WallpaperInfo>("ZiyanOS.WallpaperInfo", 1, 0, "WallpaperInfo");
     qmlRegisterType<NetworkManager>("ZiyanOS.Network", 1, 0, "NetworkManager");
+    // 注册 AppRegistry 单例到 QML
+    qmlRegisterSingletonType<AppRegistry>("ZiyanOS.Apps", 1, 0, "AppRegistry",
+                                          [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject* {
+                                              Q_UNUSED(engine);
+                                              Q_UNUSED(scriptEngine);
+                                              return AppRegistry::instance();
+                                          });
 
     qDebug() << "已注册C++类到QML系统";
 

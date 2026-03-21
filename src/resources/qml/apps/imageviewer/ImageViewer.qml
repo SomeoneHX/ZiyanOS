@@ -3,11 +3,13 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import ZiyanOS.FileSystem
 import ZiyanOS
+import ZiyanOS.Apps 1.0
 
-ZiyanWindow {
+BaseAppWindow {
     id: imageViewer
     width: 800
     height: 600
+    appId: "imageviewer"
     windowTitle: "图片查看器"
     contentBackground: "#2c3e50"
 

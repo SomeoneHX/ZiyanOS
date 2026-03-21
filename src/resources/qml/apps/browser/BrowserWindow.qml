@@ -1,19 +1,17 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtWebEngine  // 恢复 WebEngine 模块
+import QtWebEngine
 import ZiyanOS
+import ZiyanOS.Apps 1.0
 
-ZiyanWindow {
+BaseAppWindow {
     id: browserWindow
-    width: 1000
-    height: 700
+    width: 1024
+    height: 768
     windowTitle: "浏览器"
+    appId: "browser"
 
-    // 设置管理器引用
-    property var settingsManager: null
-    // 引用桌面对象
-    property var desktop: null
     // 属性：初始URL，如果为空则显示欢迎页面
     property string initialUrl: ""
     // 属性：是否将初始URL视为本地文件
@@ -49,7 +47,7 @@ ZiyanWindow {
                 Rectangle {
                     width: 40
                     height: 30
-                    color: "#3498db"  // 可用状态颜色
+                    color: "#3498db"
                     radius: 4
 
                     Text {
@@ -219,21 +217,16 @@ ZiyanWindow {
             settings.javascriptCanOpenWindows: true
             settings.javascriptCanAccessClipboard: true
             settings.localContentCanAccessRemoteUrls: true
-            settings.localContentCanAccessFileUrls: true  // 允许访问本地文件
+            settings.localContentCanAccessFileUrls: true
             settings.hyperlinkAuditingEnabled: true
             settings.scrollAnimatorEnabled: true
 
             // 处理新窗口请求
             onNewWindowRequested: function(request) {
-                console.log("新窗口请求: " + request.requestedUrl)
-                if (request.destination === WebEngineView.NewWindowInTab) {
-                    // 标签页中打开，在当前窗口打开
-                    request.openIn(webView)
-                } else {
-                    // 新窗口中打开，默认不视为本地文件
-                    browserWindow.createNewBrowserWindow(request.requestedUrl, false)
-                    request.accepted = true
-                }
+                console.log("新窗口请求:", request.url)
+                var url = request.url.toString()
+                AppRegistry.launchApp("browser", { "url": url, "isLocalFile": false })
+                request.openInDefault()
             }
 
             // 处理链接点击
@@ -245,12 +238,10 @@ ZiyanWindow {
                 if (loadRequest.status === WebEngineView.LoadStartedStatus) {
                     console.log("开始加载: " + loadRequest.url)
                     browserWindow.windowTitle = "加载中..."
-                    // 更新当前URL和模式
                     browserWindow.currentUrl = loadRequest.url.toString()
                     browserWindow.currentMode = "web"
                 } else if (loadRequest.status === WebEngineView.LoadSucceededStatus) {
                     console.log("加载成功: " + loadRequest.url)
-                    // 更新地址栏显示
                     urlBar.text = loadRequest.url.toString()
                     browserWindow.currentUrl = loadRequest.url.toString()
                     browserWindow.windowTitle = webView.title || "浏览器"
@@ -298,23 +289,17 @@ ZiyanWindow {
             showWelcomePage()
             return
         }
-        // 处理本地文件
         if (isFile) {
-            // 如果已经是 file:// 开头则直接使用，否则加上 file://
             if (!url.startsWith("file://")) {
-                // 假设 input 是绝对路径
                 url = "file://" + url
             }
         } else {
-            // 处理非本地文件：如果不是常见协议，默认加上 http://
             if (!url.match(/^[a-zA-Z]+:\/\//)) {
-                // 简单处理：直接添加 http://
                 url = "http://" + url
             }
         }
         console.log("导航到: " + url)
         webView.url = url
-        // 模式会在加载开始时自动切换为 web，此处不重复设置
     }
 
     // 显示欢迎页面
@@ -333,23 +318,13 @@ ZiyanWindow {
     // 创建新浏览器窗口
     function createNewBrowserWindow(url, isFile) {
         console.log("创建新浏览器窗口，URL:", url, "isFile:", isFile)
-        var newBrowser = browserWindowComponent.createObject(desktop, {
+        AppRegistry.launchApp("browser", {
             "initialUrl": url,
-            "isLocalFile": isFile,
-            "desktop": desktop,
-            "settingsManager": settingsManager
+            "isLocalFile": isFile
         })
-        newBrowser.showWindow()
-        desktop.openWindows.push({
-            "window": newBrowser,
-            "id": "browser_" + Date.now(),
-            "type": "browser",
-            "title": newBrowser.windowTitle
-        })
-        desktop.updateTaskbar()
     }
 
-    // 组件初始化：根据 initialUrl 显示欢迎页或加载指定 URL
+    // 组件初始化
     Component.onCompleted: {
         console.log("浏览器初始化，initialUrl:", initialUrl, "isLocalFile:", isLocalFile)
         if (initialUrl && initialUrl !== "") {

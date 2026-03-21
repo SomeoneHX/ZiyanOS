@@ -4,11 +4,13 @@ import QtQuick.Layouts
 import QtMultimedia
 import ZiyanOS.FileSystem
 import ZiyanOS
+import ZiyanOS.Apps 1.0
 
-ZiyanWindow {
+BaseAppWindow {
     id: videoPlayer
     width: 800
     height: 600
+    appId: "videoplayer"
     windowTitle: "视频播放器"
     contentBackground: "#2c3e50"
 

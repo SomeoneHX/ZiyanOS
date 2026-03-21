@@ -35,6 +35,10 @@ endif()
 # ------------------------------------------------------------------
 # 收集所有C++源文件
 set(CPP_SOURCES
+    src/modules/apps/appinfo.cpp
+    src/modules/apps/appregistry.cpp
+    src/modules/apps/appmodel.cpp
+    src/modules/apps/activewindowsmodel.cpp
     src/modules/filesystem/filesystem.cpp
     src/modules/settings/SettingsManager.cpp
     src/modules/system/SystemUtils.cpp
@@ -47,6 +51,10 @@ set(CPP_SOURCES
 
 # 收集所有头文件
 set(HEADER_FILES
+    src/modules/apps/appinfo.h
+    src/modules/apps/appregistry.h
+    src/modules/apps/appmodel.h
+    src/modules/apps/activewindowsmodel.h
     src/modules/filesystem/filesystem.h
     src/modules/settings/SettingsManager.h
     src/modules/system/SystemUtils.h
@@ -81,6 +89,7 @@ qt_add_qml_module(ZiyanOS
         # 通用组件
         src/resources/qml/components/DesktopIcon.qml
         src/resources/qml/components/ZiyanWindow.qml
+        src/resources/qml/components/BaseAppWindow.qml
         src/resources/qml/components/FilePicker.qml
         # 应用：计算器
         src/resources/qml/apps/calculator/CalculatorWindow.qml
@@ -116,11 +125,13 @@ qt_add_qml_module(ZiyanOS
         src/resources/assets/logo_animation.gif
         src/resources/fonts/NotoColorEmoji.ttf
         src/resources/fonts/SourceHanSansSC-Medium-2.otf
+        src/resources/config/builtin_apps.json
 )
 
 # 设置包含目录（系统 curl 头文件路径已通过 CURL::libcurl 自动处理）
 target_include_directories(ZiyanOS PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/apps
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/filesystem
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/settings
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/system

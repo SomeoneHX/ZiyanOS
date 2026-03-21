@@ -4,11 +4,13 @@ import QtQuick.Layouts
 import ZiyanOS.DownloadManager 1.0
 import ZiyanOS.FileSystem
 import ZiyanOS
+import ZiyanOS.Apps 1.0
 
-ZiyanWindow {
+BaseAppWindow {
     id: downloadWindow
     width: 500
     height: 450
+    appId: "downloadmanager"
     windowTitle: "下载管理器"
 
     property var filePicker: null

@@ -8,7 +8,7 @@ ApplicationWindow {
     id: powerWindow
     width: Screen.width
     height: Screen.height
-    visible: false
+    // visible: false
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
     visibility: Window.FullScreen                             // 全屏模式
     title: "电源菜单"

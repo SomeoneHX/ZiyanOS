@@ -5,28 +5,24 @@ import ZiyanOS.SettingsManager
 import ZiyanOS.SystemUtils
 import Qt5Compat.GraphicalEffects
 import ZiyanOS
+import ZiyanOS.Apps 1.0
 
 ApplicationWindow {
     id: desktop
     width: Screen.width
     height: Screen.height
-    visible: false
+    // visible: false
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnBottomHint
-    visibility: Window.FullScreen                             // 全屏模式
+    visibility: Window.FullScreen
     title: "字研OS 桌面"
 
-    // 关键修改：添加一个属性来标记是否允许关闭
     property bool allowClose: false
-
-    // 窗口管理器引用
     property var windowManager: null
 
-    // 添加SystemUtils
     SystemUtils {
         id: systemUtils
     }
 
-    // 添加设置管理器
     SettingsManager {
         id: settingsManager
         onDesktopBackgroundChanged: function(background) {
@@ -47,20 +43,15 @@ ApplicationWindow {
         }
     }
 
-    // 壁纸属性 - 从设置管理器获取
     property string desktopBackground: settingsManager.desktopBackground
     property string desktopWallpaper: settingsManager.desktopWallpaper
 
-    // 存储打开的窗口
-    property var openWindows: []
-
-    // 桌面背景
+    // 背景
     Rectangle {
         anchors.fill: parent
         id: desktopBackgroundRect
         color: desktopWallpaper === "" ? desktopBackground : "transparent"
 
-        // 如果设置了壁纸图片，显示图片
         Image {
             anchors.fill: parent
             source: desktopWallpaper
@@ -68,7 +59,7 @@ ApplicationWindow {
             visible: desktopWallpaper !== ""
         }
 
-        // 桌面图标区域 - GridView 布局实现竖向排列和自动换列
+        // 桌面图标区域：使用 AppRegistry 的应用模型
         GridView {
             id: desktopIcons
             anchors {
@@ -79,66 +70,44 @@ ApplicationWindow {
                 right: parent.right
                 bottom: parent.bottom
             }
-
             flow: GridView.FlowTopToBottom
             cellWidth: 100
             cellHeight: 100
             layoutDirection: Qt.LeftToRight
             interactive: false
 
-            delegate: Item {
-                width: desktopIcons.cellWidth
-                height: desktopIcons.cellHeight
+            model: AppRegistry.appModel
 
-                DesktopIcon {
-                    iconText: model.iconText || "🌐"
-                    iconName: model.iconName || "应用"
-                    anchors.centerIn: parent
-
-                    onClicked: {
-                        createApplicationWindow(model.appType || "")
-                    }
+            delegate: DesktopIcon {
+                // 将图标路径转换为文本（临时处理，建议改为图片）
+                iconText: {
+                    // 如果图标是 emoji 字符串，直接使用；否则取文件名或默认
+                    if (model.icon.startsWith("qrc:") || model.icon.startsWith("file:"))
+                        return "📄" // 默认图标
+                    else
+                        return model.icon
                 }
-            }
-
-            model: ListModel {
-                id: desktopIconsModel
-            }
-
-            Component.onCompleted: {
-                var systemApps = [
-                    { iconText: "🌐", iconName: "浏览器", appType: "browser", appId: "browser" },
-                    { iconText: "📁", iconName: "文件浏览器", appType: "filebrowser", appId: "filebrowser" },
-                    { iconText: "🧮", iconName: "计算器", appType: "calculator", appId: "calculator" },
-                    { iconText: "📝", iconName: "文本编辑器", appType: "texteditor", appId: "texteditor" },
-                    { iconText: "🖼️", iconName: "图片查看器", appType: "imageviewer", appId: "imageviewer" },
-                    { iconText: "🎵", iconName: "音乐播放器", appType: "musicplayer", appId: "musicplayer" },
-                    { iconText: "🎬", iconName: "视频播放器", appType: "videoplayer", appId: "videoplayer" },
-                    { iconText: "⬇️", iconName: "下载管理器", appType: "downloadmanager", appId: "downloadmanager" },
-                    { iconText: "⚙️", iconName: "设置", appType: "settings", appId: "settings" }
-                ]
-
-                for (var i = 0; i < systemApps.length; i++) {
-                    desktopIconsModel.append(systemApps[i])
+                iconName: model.name
+                onClicked: {
+                    AppRegistry.launchApp(model.appId, {})
                 }
             }
         }
 
-        // 打开的窗口容器
+        // 打开的窗口容器（保留用于兼容，但不再手动管理）
         Item {
             id: windowsContainer
             anchors.fill: parent
         }
     }
 
-    // 任务栏（含高斯模糊背景）
+    // 任务栏
     Item {
         id: taskbar
         width: parent.width
-        height: 60  // 增加高度以容纳更大图标
+        height: 60
         anchors.bottom: parent.bottom
 
-        // 截取任务栏区域的桌面背景作为模糊源
         ShaderEffectSource {
             id: blurSource
             sourceItem: desktopBackgroundRect
@@ -146,7 +115,6 @@ ApplicationWindow {
             live: true
         }
 
-        // 高斯模糊效果（只显示在任务栏区域）
         GaussianBlur {
             anchors.fill: parent
             source: blurSource
@@ -154,21 +122,73 @@ ApplicationWindow {
             samples: 16
         }
 
-        // 半透明颜色覆盖层
         Rectangle {
             anchors.fill: parent
             color: "#2c3e50"
             opacity: 0.6
         }
 
-        // 任务栏图标行 - 现在在整个任务栏中居中
+        // 任务栏图标行：动态绑定活动窗口模型
         Row {
             id: taskbarApps
             spacing: 8
-            anchors.centerIn: parent  // 水平垂直居中
+            anchors.centerIn: parent
+
+            Repeater {
+                model: AppRegistry.activeWindowsModel
+                delegate: Rectangle {
+                    id: button
+                    width: 48; height: 48
+                    radius: 6
+                    color: "transparent"
+
+                    property int windowIndex: index
+
+                    Text {
+                        text: model.icon ? model.icon : "📄"
+                        color: "white"
+                        font.pixelSize: 28
+                        anchors.centerIn: parent
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: parent.radius
+                        color: "#7f8c8d"
+                        opacity: 0
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                    }
+
+                    MouseArea {
+                        id: mouseArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: button.color = "#34495e"
+                        onExited: button.color = "transparent"
+                        onClicked: {
+                            var window = AppRegistry.getWindowByIndex(windowIndex)
+                            if (window) {
+                                if (window.isMinimized)
+                                    window.restoreWindow()
+                                else
+                                    window.minimizeWindow()
+                            }
+                        }
+                    }
+
+                    ToolTip {
+                        visible: mouseArea.containsMouse && model.title !== ""
+                        text: model.title
+                        delay: 100
+                        timeout: -1
+                        y: -height - 5
+                        x: (parent.width - width) / 2
+                    }
+                }
+            }
         }
 
-        // 任务栏右侧 - 日期、时间、锁屏和电源（保持不变）
+        // 系统托盘（日期、锁屏、电源）
         Row {
             id: systemTray
             spacing: 15
@@ -178,7 +198,6 @@ ApplicationWindow {
                 verticalCenter: parent.verticalCenter
             }
 
-            // 日期和时间显示
             Column {
                 spacing: 2
                 anchors.verticalCenter: parent.verticalCenter
@@ -257,144 +276,16 @@ ApplicationWindow {
                     onEntered: parent.color = "#e74c3c"
                     onExited: parent.color = "transparent"
                     onClicked: {
-                        createApplicationWindow("power")
+                        if (desktop.windowManager && desktop.windowManager.switchToPowerMenu) {
+                            desktop.windowManager.switchToPowerMenu()
+                        }
                     }
                 }
             }
         }
     }
 
-    // 修改壁纸改变的处理函数
-    function handleWallpaperChanged(background, wallpaperPath) {
-        console.log("壁纸改变:", background, wallpaperPath)
-        settingsManager.desktopBackground = background
-        settingsManager.desktopWallpaper = wallpaperPath
-        settingsManager.saveSettings()
-    }
-
-    // 组件定义（所有应用窗口组件）
-    Component {
-        id: textEditorWindowComponent
-        TextEditor {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    Component {
-        id: powerWindowComponent
-        PowerWindow {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    Component {
-        id: browserWindowComponent
-        BrowserWindow {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    Component {
-        id: fileBrowserWindowComponent
-        FileBrowserWindow {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    Component {
-        id: calculatorWindowComponent
-        CalculatorWindow {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    Component {
-        id: imageViewerWindowComponent
-        ImageViewer {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    Component {
-        id: musicPlayerWindowComponent
-        MusicPlayer {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    Component {
-        id: videoPlayerWindowComponent
-        VideoPlayer {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    Component {
-        id: downloadManagerWindowComponent
-        DownloadManagerWindow {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    Component {
-        id: settingsWindowComponent
-        SettingsWindow {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-            onWallpaperChanged: (background, wallpaperPath) => {
-                desktop.handleWallpaperChanged(background, wallpaperPath)
-            }
-        }
-    }
-
-    // 彩蛋窗口组件
-    Component {
-        id: easterEggWindowComponent
-        EasterEggWindow {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    // 获取应用图标
-    function getAppIcon(appType) {
-        switch(appType) {
-            case "browser": return "🌐"
-            case "filebrowser": return "📁"
-            case "calculator": return "🧮"
-            case "texteditor": return "📝"
-            case "imageviewer": return "🖼️"
-            case "musicplayer": return "🎵"
-            case "videoplayer": return "🎬"
-            case "downloadmanager": return "⬇️"
-            case "settings": return "⚙️"
-            case "power": return "🔌"
-            case "easteregg": return "🥚"
-            default: return "📄"
-        }
-    }
-
-    // 更新日期和时间
+    // 日期时间更新定时器
     Timer {
         interval: 1000
         running: true
@@ -406,161 +297,7 @@ ApplicationWindow {
         }
     }
 
-    // 创建应用窗口
-    function createApplicationWindow(type, additionalParam) {
-        var window
-        var windowId = type + "_" + Date.now()
-        var appIcon = getAppIcon(type)
-
-        switch(type) {
-            case "power":
-                if (desktop.windowManager) {
-                    desktop.windowManager.switchToPowerMenu()
-                    return
-                }
-                window = powerWindowComponent.createObject(desktop)
-                window.requestDesktopClose.connect(function() {
-                    allowClose = true
-                    Qt.quit()
-                })
-                break
-            case "browser":
-                var initialUrl = ""
-                var isLocalFile = false
-
-                if (typeof additionalParam === 'object' && additionalParam !== null) {
-                    initialUrl = additionalParam.url || ""
-                    isLocalFile = additionalParam.isLocalFile || false
-                } else {
-                    initialUrl = additionalParam || ""
-                }
-
-                window = browserWindowComponent.createObject(desktop, {
-                    "initialUrl": initialUrl,
-                    "isLocalFile": isLocalFile,
-                    "desktop": desktop,
-                    "settingsManager": settingsManager
-                })
-                break
-            case "filebrowser":
-                window = fileBrowserWindowComponent.createObject(desktop)
-                break
-            case "calculator":
-                window = calculatorWindowComponent.createObject(desktop)
-                break
-            case "texteditor":
-                var filePath = "";
-                var readOnly = false;
-                if (typeof additionalParam === 'object' && additionalParam !== null) {
-                    filePath = additionalParam.filePath || "";
-                    readOnly = additionalParam.readOnly || false;
-                } else {
-                    filePath = additionalParam || "";
-                }
-                window = textEditorWindowComponent.createObject(desktop, {
-                    "readOnly": readOnly
-                });
-                if (filePath && window.openFile) {
-                    Qt.callLater(function() {
-                        window.openFile(filePath);
-                    });
-                }
-                break;
-            case "imageviewer":
-                window = imageViewerWindowComponent.createObject(desktop)
-                if (additionalParam && window.openImage) {
-                    Qt.callLater(function() {
-                        window.openImage(additionalParam)
-                    })
-                }
-                break
-            case "musicplayer":
-                window = musicPlayerWindowComponent.createObject(desktop)
-                if (additionalParam && window.openMusic) {
-                    Qt.callLater(function() {
-                        window.openMusic(additionalParam)
-                    })
-                }
-                break
-            case "settings":
-                window = settingsWindowComponent.createObject(desktop, {
-                    "currentBackground": desktopBackground,
-                    "currentWallpaper": desktopWallpaper,
-                    "settingsManager": settingsManager,
-                    "desktop": desktop
-                })
-                break
-            case "videoplayer":
-                window = videoPlayerWindowComponent.createObject(desktop)
-                if (additionalParam && window.openVideo) {
-                    Qt.callLater(function() {
-                        window.openVideo(additionalParam)
-                    })
-                }
-                break
-            case "downloadmanager":
-                var downloadUrl = ""
-                if (additionalParam) {
-                    if (typeof additionalParam === 'object' && additionalParam !== null) {
-                        downloadUrl = additionalParam.url || ""
-                    } else {
-                        downloadUrl = additionalParam
-                    }
-                }
-                window = downloadManagerWindowComponent.createObject(desktop, {
-                    "initialUrl": downloadUrl
-                })
-                break
-            case "easteregg":
-                window = easterEggWindowComponent.createObject(desktop)
-                break
-            default:
-                console.log("未知的窗口类型: " + type)
-                return
-        }
-
-        if (window) {
-            if (window.settingsManager !== undefined) {
-                window.settingsManager = settingsManager
-            }
-
-            if (window.globalWindowMode !== undefined) {
-                window.globalWindowMode = settingsManager.windowTitleBarMode || "auto"
-                window.globalWindowColor = settingsManager.windowTitleBarColor || "#3498db"
-            }
-            window.showWindow()
-            openWindows.push({
-                "window": window,
-                "id": windowId,
-                "type": type,
-                "title": window.windowTitle,  // 存储窗口标题用于任务栏提示
-                "icon": appIcon
-            })
-            updateTaskbar()
-        }
-    }
-
-    // 移除窗口
-    function removeWindow(window) {
-        for (var i = 0; i < openWindows.length; i++) {
-            if (openWindows[i].window === window) {
-                openWindows.splice(i, 1)
-                updateTaskbar()
-                break
-            }
-        }
-    }
-
-    // 切换到窗口
-    function activateWindow(index) {
-        if (index >= 0 && index < openWindows.length) {
-            var window = openWindows[index].window
-            window.requestActivate()
-            window.raise()
-        }
-    }
-
-    // 任务栏按钮组件 - 增加工具提示显示应用名称
+    // 任务栏按钮组件
     Component {
         id: taskbarButtonComponent
 
@@ -573,9 +310,8 @@ ApplicationWindow {
 
             property int windowIndex: -1
             property string windowIcon: "📄"
-            property string windowTitle: ""  // 新增属性，用于工具提示
+            property string windowTitle: ""
 
-            // 图标
             Text {
                 text: windowIcon
                 color: "white"
@@ -583,7 +319,6 @@ ApplicationWindow {
                 anchors.centerIn: parent
             }
 
-            // 鼠标悬停效果
             Rectangle {
                 anchors.fill: parent
                 radius: parent.radius
@@ -592,7 +327,6 @@ ApplicationWindow {
                 Behavior on opacity { NumberAnimation { duration: 200 } }
             }
 
-            // 鼠标区域，用于悬停检测和点击
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
@@ -600,36 +334,35 @@ ApplicationWindow {
                 onEntered: button.color = "#34495e"
                 onExited: button.color = "transparent"
                 onClicked: {
-                    var windowInfo = desktop.openWindows[windowIndex]
-                    if (windowInfo) {
-                        if (windowInfo.window.isMinimized)
-                            windowInfo.window.restoreWindow()
+                    var window = AppRegistry.getWindowByIndex(windowIndex)
+                    if (window) {
+                        if (window.isMinimized)
+                            window.restoreWindow()
                         else
-                            windowInfo.window.minimizeWindow()
+                            window.minimizeWindow()
                     }
                 }
             }
 
-            // 工具提示：鼠标悬停时显示应用名称
             ToolTip {
                 visible: mouseArea.containsMouse && windowTitle !== ""
                 text: windowTitle
                 delay: 100
-                timeout: -1  // 不自动隐藏，鼠标移出即消失
-                // 设置提示显示在按钮上方
+                timeout: -1
                 y: -height - 5
                 x: (parent.width - width) / 2
             }
         }
     }
 
+    // 更新所有窗口的外观设置（遍历活动窗口）
     function updateWindowSettings() {
-        for (var i = 0; i < openWindows.length; i++) {
-            var window = openWindows[i].window
+        var count = AppRegistry.activeWindowsModel.rowCount()
+        for (var i = 0; i < count; i++) {
+            var window = AppRegistry.getWindowByIndex(i)
             if (window && window.globalWindowMode !== undefined) {
                 window.globalWindowMode = settingsManager.windowTitleBarMode
                 window.globalWindowColor = settingsManager.windowTitleBarColor
-
                 if (window.settingsManager !== undefined) {
                     window.settingsManager = settingsManager
                 }
@@ -637,22 +370,24 @@ ApplicationWindow {
         }
     }
 
-    function updateTaskbar() {
-        // 清空任务栏图标行
-        for (var i = taskbarApps.children.length - 1; i >= 0; i--) {
-            taskbarApps.children[i].destroy()
-        }
-        // 重新为每个打开的窗口创建按钮，并传递窗口标题
-        for (var j = 0; j < openWindows.length; j++) {
-            var windowInfo = openWindows[j]
-            taskbarButtonComponent.createObject(taskbarApps, {
-                "windowIndex": j,
-                "windowIcon": windowInfo.icon,
-                "windowTitle": windowInfo.title  // 传递窗口标题
-            })
+    // 激活指定索引的窗口
+    function activateWindow(index) {
+        var window = AppRegistry.getWindowByIndex(index)
+        if (window) {
+            window.requestActivate()
+            window.raise()
         }
     }
 
+    // 壁纸变化处理（由设置页面调用）
+    function handleWallpaperChanged(background, wallpaperPath) {
+        console.log("壁纸改变:", background, wallpaperPath)
+        settingsManager.desktopBackground = background
+        settingsManager.desktopWallpaper = wallpaperPath
+        settingsManager.saveSettings()
+    }
+
+    // 组件完成时初始化
     Component.onCompleted: {
         var currentTime = new Date()
         dateText.text = currentTime.toLocaleDateString(Qt.locale(), "yyyy-MM-dd dddd")
@@ -665,7 +400,6 @@ ApplicationWindow {
             console.log("窗口模式改变:", mode)
             updateWindowSettings()
         })
-
         settingsManager.windowTitleBarColorChanged.connect(function(color) {
             console.log("窗口颜色改变:", color)
             updateWindowSettings()
@@ -676,25 +410,29 @@ ApplicationWindow {
         requestActivate()
     }
 
+    // 窗口关闭处理（Alt+F4）
     onClosing: (close) => {
         console.log("Desktop window closing event triggered, allowClose:", allowClose)
 
         if (!allowClose) {
             close.accepted = false
 
+            // 检查是否已有电源菜单打开（通过活动窗口模型判断）
             var hasPowerWindow = false
-            for (var i = 0; i < openWindows.length; i++) {
-                if (openWindows[i].type === "power") {
+            var count = AppRegistry.activeWindowsModel.rowCount()
+            for (var i = 0; i < count; i++) {
+                var window = AppRegistry.getWindowByIndex(i)
+                if (window && window.appId === "power") {
                     hasPowerWindow = true
-                    openWindows[i].window.raise()
-                    openWindows[i].window.requestActivate()
+                    window.raise()
+                    window.requestActivate()
                     break
                 }
             }
 
-            if (!hasPowerWindow) {
-                console.log("Alt+F4 pressed, showing power window. Has power window:", hasPowerWindow)
-                createApplicationWindow("power")
+            if (!hasPowerWindow && windowManager) {
+                console.log("Alt+F4 pressed, showing power window.")
+                windowManager.switchToPowerMenu()
             }
         } else {
             close.accepted = true

@@ -8,7 +8,7 @@ ApplicationWindow {
     id: lockScreen
     width: Screen.width
     height: Screen.height
-    visible: false
+    // visible: false
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
     visibility: Window.FullScreen                             // 全屏模式
     title: "锁屏界面"

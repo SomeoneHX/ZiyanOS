@@ -3,11 +3,13 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import ZiyanOS.FileSystem
 import ZiyanOS
+import ZiyanOS.Apps 1.0
 
-ZiyanWindow {
+BaseAppWindow {
     id: textEditor
     width: 800
     height: 600
+    appId: "texteditor"
     windowTitle: "未命名 - 文本编辑器"
 
     // 新增：只读模式属性，可由外部传入

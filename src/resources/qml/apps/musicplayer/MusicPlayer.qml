@@ -4,11 +4,13 @@ import QtQuick.Layouts
 import QtMultimedia
 import ZiyanOS.FileSystem
 import ZiyanOS
+import ZiyanOS.Apps 1.0
 
-ZiyanWindow {
+BaseAppWindow {
     id: musicPlayer
     width: 400
     height: 400
+    appId: "musicplayer"
     windowTitle: "音乐播放器"
     contentBackground: "#2c3e50"
 

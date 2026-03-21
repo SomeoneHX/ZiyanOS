@@ -1,4 +1,3 @@
-// WallpaperPage.qml
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -18,14 +17,18 @@ Item {
     // 文件选择器实例
     property var filePicker: null
 
-    // 文件系统
-    property var fileSystem: FileSystem {}
+    // 文件系统实例
+    FileSystem {
+        id: fileSystem
+    }
 
-    // 设置管理器
-    property var settingsManager: SettingsManager {}
+    // 设置管理器实例
+    SettingsManager {
+        id: settingsManager
+    }
 
-    // 壁纸管理器
-    property var wallpaperManager: WallpaperManager {
+    // 壁纸管理器实例
+    WallpaperManager {
         id: wallpaperManager
         onWallpapersLoaded: {
             if (success) {
@@ -161,7 +164,7 @@ Item {
                     color: "#2c3e50"
                 }
 
-                // 刷新按钮
+                // 刷新按钮（默认隐藏，可启用）
                 Rectangle {
                     width: 80
                     height: 30
@@ -201,7 +204,7 @@ Item {
                 width: parent.width
                 height: Math.ceil(systemWallpaperModel.count / 3) * 130
                 cellWidth: parent.width / 3 - 20
-                cellHeight: 130  // 增加单元格高度
+                cellHeight: 130
                 model: systemWallpaperModel
                 clip: true
                 visible: systemWallpaperModel.count > 0
@@ -215,9 +218,9 @@ Item {
                     Rectangle {
                         id: thumbContainer
                         width: parent.width - 20
-                        height: parent.height - 25  // 预留文字高度（25px 足够容纳文字 + 间距）
+                        height: parent.height - 25
                         anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.top: parent.top     // 固定在 delegate 顶部
+                        anchors.top: parent.top
                         color: "#f5f5f5"
                         radius: 4
                         border.width: currentWallpaperId === model.id ? 2 : 0
@@ -261,7 +264,7 @@ Item {
                         }
                     }
 
-                    // 壁纸名称（锚定在缩略图容器下方）
+                    // 壁纸名称
                     Text {
                         text: model.name
                         color: "#2c3e50"
