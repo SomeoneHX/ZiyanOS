@@ -8,7 +8,7 @@ SettingsManager::SettingsManager(QObject *parent)
     : QObject(parent)
 {
     // 设置文件路径
-    QString configPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/ZiyanOS/config.ini";
+    QString configPath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + "/config.ini";
     QFileInfo configFile(configPath);
     QDir configDir = configFile.absoluteDir();
 

@@ -19,14 +19,14 @@ Item {
         Item {
             id: logoContainer
             width: 360
-            height: 150
+            height: 100
             anchors.horizontalCenter: parent.horizontalCenter
 
             Rectangle {
                 id: logoBackground
                 anchors.centerIn: parent
                 width: 360
-                height: 150
+                height: 100
                 radius: 15
                 color: "Black"
                 z: 0
@@ -36,7 +36,7 @@ Item {
                 id: bootAnimation
                 source: "qrc:/qt/qml/ZiyanOS/src/resources/assets/logo_animation.gif"
                 width: 300
-                height: 130
+                height: 100
                 anchors.centerIn: parent
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -157,24 +157,8 @@ Item {
                 spacing: 15
                 width: parent.width
 
-                Rectangle {
-                    width: 48
-                    height: 48
-                    radius: 8
-                    color: "#ecf0f1"
-                    border.color: "#bdc3c7"
-
-                    Image {
-                        anchors.centerIn: parent
-                        width: 40
-                        height: 40
-                        source: "qrc:/qt/qml/ZiyanOS/src/resources/assets/hwl.png"
-                        fillMode: Image.PreserveAspectFit
-                    }
-                }
-
                 Column {
-                    width: parent.width - 63
+                    width: parent.width
                     spacing: 4
                     anchors.verticalCenter: parent.verticalCenter
 
@@ -188,6 +172,34 @@ Item {
                     }
                     Text {
                         text: "提供精神支持。"
+                        color: "#7f8c8d"
+                        font.pixelSize: 14
+                        elide: Text.ElideRight
+                        width: parent.width
+                    }
+                }
+            }
+
+            // 条目：deepseek
+            Row {
+                spacing: 15
+                width: parent.width
+
+                Column {
+                    width: parent.width
+                    spacing: 4
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Text {
+                        text: "deepseek"
+                        color: "#2c3e50"
+                        font.pixelSize: 16
+                        font.bold: true
+                        elide: Text.ElideRight
+                        width: parent.width
+                    }
+                    Text {
+                        text: "提供代码"
                         color: "#7f8c8d"
                         font.pixelSize: 14
                         elide: Text.ElideRight

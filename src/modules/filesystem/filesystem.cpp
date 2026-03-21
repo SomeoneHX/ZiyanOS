@@ -1,16 +1,22 @@
 #include "filesystem.h"
+#include <QDir>
+#include <QFileInfo>
+#include <QStorageInfo>
+#include <QTextStream>
+#include <QDateTime>
+#include <QDebug>
 
 FileSystem::FileSystem(QObject *parent) : QObject(parent)
 {
 }
 
-// 新增：判断路径是否位于 X 盘（不区分大小写）
+// 判断路径是否受保护（目前仅禁止对根目录 / 的写入操作）
 bool FileSystem::isRestrictedPath(const QString &path) const
 {
     if (path.isEmpty())
         return false;
-    // 取前两个字符，忽略大小写比较是否为 "X:"
-    return QString::compare(path.left(2), "X:", Qt::CaseInsensitive) == 0;
+    QString normalized = QDir::cleanPath(path);
+    return normalized == "/";
 }
 
 QVariantList FileSystem::getDrives()
@@ -18,28 +24,50 @@ QVariantList FileSystem::getDrives()
     QVariantList drives;
 
     try {
+        // 1. 添加主目录（/home/用户名）作为一个特殊条目
+        QVariantMap homeDrive;
+        QString homePath = QDir::homePath();
+        homeDrive["name"] = "主目录 (" + homePath + ")";
+        homeDrive["path"] = homePath;
+        homeDrive["type"] = "home";
+        homeDrive["size"] = "";
+        drives.append(homeDrive);
+
+        // 2. 获取所有挂载卷，只保留 /mnt 下的挂载点
         QList<QStorageInfo> storageList = QStorageInfo::mountedVolumes();
 
         for (const QStorageInfo &storage : storageList) {
-            if (storage.isValid() && storage.isReady()) {
-                QVariantMap drive;
-                QString rootPath = storage.rootPath();
-                QString name = storage.name();
-                if (name.isEmpty()) {
-                    name = "本地磁盘 (" + rootPath.left(2) + ")";
-                }
-                drive["name"] = name;
-                drive["path"] = rootPath;
-                // 如果是 X 盘，标记为系统盘
-                if (isRestrictedPath(rootPath)) {
-                    drive["type"] = "system";
-                } else {
-                    drive["type"] = "drive";
-                }
-                drive["size"] = formatFileSize(storage.bytesTotal());
+            if (!storage.isValid() || !storage.isReady())
+                continue;
 
-                drives.append(drive);
+            QString rootPath = storage.rootPath();
+            // 排除根目录自身
+            if (rootPath == "/")
+                continue;
+
+            // 只保留挂载点以 /mnt 开头的（包括 /mnt 本身，但 /mnt 通常不是挂载点）
+            if (!rootPath.startsWith("/mnt") && !rootPath.startsWith("/media"))
+                continue;
+
+            // 过滤掉虚拟文件系统（虽然 /mnt 下一般不会有，但保留安全检查）
+            QString fsType = storage.fileSystemType();
+            if (fsType == "proc" || fsType == "sysfs" || fsType == "tmpfs" ||
+                fsType == "devtmpfs" || fsType == "cgroup" || fsType == "pstore" ||
+                fsType == "debugfs" || fsType == "tracefs" || fsType == "configfs" ||
+                fsType == "fusectl" || fsType == "securityfs" || fsType == "bpf")
+                continue;
+
+            QVariantMap drive;
+            QString name = storage.name();
+            if (name.isEmpty()) {
+                name = "挂载点 (" + rootPath + ")";
             }
+            drive["name"] = name;
+            drive["path"] = rootPath;
+            drive["type"] = "drive";
+            drive["size"] = formatFileSize(storage.bytesTotal());
+
+            drives.append(drive);
         }
     } catch (const std::exception &e) {
         emit errorOccurred(QString("获取驱动器列表失败: %1").arg(e.what()));
@@ -51,12 +79,6 @@ QVariantList FileSystem::getDrives()
 QVariantList FileSystem::getDirectoryContents(const QString &path)
 {
     QVariantList contents;
-
-    // 权限检查：如果路径在 X 盘，拒绝访问
-    if (isRestrictedPath(path)) {
-        emit errorOccurred("无权限访问系统盘 X:");
-        return contents;
-    }
 
     try {
         QDir dir(path);
@@ -87,29 +109,18 @@ QVariantList FileSystem::getDirectoryContents(const QString &path)
 
 bool FileSystem::isDir(const QString &path)
 {
-    // 权限检查：如果是 X 盘路径，直接返回 false（但通常不会调用到）
-    if (isRestrictedPath(path)) {
-        emit errorOccurred("无权限访问系统盘 X:");
-        return false;
-    }
     QFileInfo info(path);
     return info.isDir();
 }
 
 QString FileSystem::getFileName(const QString &path)
 {
-    // 路径操作，不涉及实际读取，可以不做权限检查
     QFileInfo info(path);
     return info.fileName();
 }
 
 QString FileSystem::getFileSize(const QString &path)
 {
-    // 权限检查
-    if (isRestrictedPath(path)) {
-        emit errorOccurred("无权限访问系统盘 X:");
-        return "";
-    }
     QFileInfo info(path);
     if (info.isDir()) {
         return "";
@@ -119,18 +130,12 @@ QString FileSystem::getFileSize(const QString &path)
 
 QString FileSystem::getFileType(const QString &path)
 {
-    // 权限检查
-    if (isRestrictedPath(path)) {
-        emit errorOccurred("无权限访问系统盘 X:");
-        return "";
-    }
     QFileInfo info(path);
     return info.isDir() ? "文件夹" : "文件";
 }
 
 QString FileSystem::getParentDirectory(const QString &path)
 {
-    // 路径计算，不涉及实际访问，可不检查
     QDir dir(path);
     if (dir.isRoot()) {
         return "";
@@ -141,11 +146,6 @@ QString FileSystem::getParentDirectory(const QString &path)
 
 QDateTime FileSystem::getFileModifiedTime(const QString &path)
 {
-    // 权限检查
-    if (isRestrictedPath(path)) {
-        emit errorOccurred("无权限访问系统盘 X:");
-        return QDateTime();
-    }
     QFileInfo info(path);
     return info.lastModified();
 }
@@ -172,14 +172,12 @@ QString FileSystem::readFile(const QString &filePath)
 
 bool FileSystem::writeFile(const QString &filePath, const QString &content)
 {
-    // 权限检查：写入目标在 X 盘则拒绝
     if (isRestrictedPath(filePath)) {
-        emit errorOccurred("无权限写入系统盘 X:");
+        emit errorOccurred("无权限写入系统根目录");
         return false;
     }
 
     QFile file(filePath);
-
     QFileInfo fileInfo(filePath);
     QDir dir = fileInfo.absoluteDir();
     if (!dir.exists()) {
@@ -203,9 +201,8 @@ bool FileSystem::writeFile(const QString &filePath, const QString &content)
 
 bool FileSystem::createDirectory(const QString &path)
 {
-    // 权限检查
     if (isRestrictedPath(path)) {
-        emit errorOccurred("无权限在系统盘 X: 创建目录");
+        emit errorOccurred("无权限在系统根目录创建目录");
         return false;
     }
 
@@ -221,19 +218,13 @@ bool FileSystem::createDirectory(const QString &path)
 
 bool FileSystem::fileExists(const QString &filePath)
 {
-    // 权限检查
-    if (isRestrictedPath(filePath)) {
-        // 即使文件存在，我们也视为不可见，返回 false
-        return false;
-    }
     return QFile::exists(filePath);
 }
 
 bool FileSystem::deleteFile(const QString &filePath)
 {
-    // 权限检查
     if (isRestrictedPath(filePath)) {
-        emit errorOccurred("无权限删除系统盘 X: 上的文件");
+        emit errorOccurred("无权限删除系统根目录上的文件");
         return false;
     }
 
@@ -254,9 +245,8 @@ bool FileSystem::deleteFile(const QString &filePath)
 
 bool FileSystem::deleteDirectory(const QString &path)
 {
-    // 权限检查
     if (isRestrictedPath(path)) {
-        emit errorOccurred("无权限删除系统盘 X: 上的文件夹");
+        emit errorOccurred("无权限删除系统根目录");
         return false;
     }
 
@@ -278,13 +268,12 @@ bool FileSystem::deleteDirectory(const QString &path)
 
 bool FileSystem::renameFile(const QString &oldPath, const QString &newPath)
 {
-    // 权限检查：源或目标在 X 盘均拒绝
     if (isRestrictedPath(oldPath)) {
-        emit errorOccurred("无权限重命名系统盘 X: 上的文件");
+        emit errorOccurred("无权限重命名系统根目录上的文件");
         return false;
     }
     if (isRestrictedPath(newPath)) {
-        emit errorOccurred("无权限将文件重命名到系统盘 X:");
+        emit errorOccurred("无权限将文件重命名到系统根目录");
         return false;
     }
 

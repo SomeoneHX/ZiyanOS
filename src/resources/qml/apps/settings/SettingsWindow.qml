@@ -219,6 +219,12 @@ ZiyanWindow {
                         NetworkPage {
                             width: parent.width
                         }
+                        onCurrentIndexChanged: {
+                            // 重置滚动位置到顶部
+                            if (scrollView.contentItem && scrollView.contentItem.contentY !== undefined) {
+                                scrollView.contentItem.contentY = 0
+                            }
+                        }
                     }
                 }
             }

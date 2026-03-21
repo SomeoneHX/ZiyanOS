@@ -14,6 +14,7 @@ Window {
     minimumHeight: 150
 
     // 公共属性
+    property bool isWayland: platformName === "wayland"
     property string windowTitle: "窗口"
     property color titleBarColor: calculateTitleBarColor()
     property alias contentItem: contentContainer.data
@@ -242,7 +243,7 @@ Window {
                 property point clickPos: "0,0"
                 onPressed: (mouse) => { clickPos = Qt.point(mouse.x, mouse.y) }
                 onPositionChanged: (mouse) => {
-                    if (!isMaximized) {
+                    if (!isMaximized && !isWayland) {
                         var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y)
                         ziyanWindow.x += delta.x
                         ziyanWindow.y += delta.y
@@ -664,12 +665,29 @@ Window {
     function toggleMaximize() {
         if (isAnimating) return
 
-        if (isMaximized) {
-            restoreFromMaximizeAnimation.start()
+        if (isWayland) {
+            if (isMaximized) {
+                showNormal()
+            } else {
+                showMaximized()
+            }
         } else {
-            originalPosition = Qt.point(ziyanWindow.x, ziyanWindow.y)
-            originalSize = Qt.size(ziyanWindow.width, ziyanWindow.height)
-            maximizeAnimation.start()
+            if (isMaximized) {
+                restoreFromMaximizeAnimation.start()
+            } else {
+                originalPosition = Qt.point(ziyanWindow.x, ziyanWindow.y)
+                originalSize = Qt.size(ziyanWindow.width, ziyanWindow.height)
+                maximizeAnimation.start()
+            }
+        }
+    }
+
+    onVisibilityChanged: {
+        isMaximized = (visibility === Window.Maximized)
+        if (isMaximized) {
+            // 记录原始位置和大小，以便恢复时使用
+            originalPosition = Qt.point(x, y)
+            originalSize = Qt.size(width, height)
         }
     }
 

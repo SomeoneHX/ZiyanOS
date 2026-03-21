@@ -62,6 +62,10 @@ add_executable(ZiyanOS
     ${HEADER_FILES}
 )
 
+set_target_properties(ZiyanOS PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
+
 # 配置QML模块
 qt_add_qml_module(ZiyanOS
     URI ZiyanOS
@@ -105,14 +109,11 @@ qt_add_qml_module(ZiyanOS
         src/resources/qml/apps/settings/NetworkPage.qml
         # 应用：下载管理器
         src/resources/qml/apps/downloadmanager/DownloadManagerWindow.qml
-        # 应用：Windows兼容层
-        src/resources/qml/apps/winecompat/WineCompatLayer.qml
         # 应用：彩蛋
         src/resources/qml/apps/easteregg/EasterEggWindow.qml
     RESOURCES
         src/resources/assets/logo.png
         src/resources/assets/logo_animation.gif
-        src/resources/assets/hwl.png
         src/resources/fonts/NotoColorEmoji.ttf
         src/resources/fonts/SourceHanSansSC-Medium-2.otf
 )

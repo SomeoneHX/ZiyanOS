@@ -1,4 +1,4 @@
-# 字研 OS (ZiyanOS) - 桌面环境模拟器
+# 字研 OS NEXT
 
 ![Logo](./src/resources/assets/logo.png)
 
@@ -53,7 +53,6 @@
 - **Qt 6.8+** (Core, Quick, QuickControls2, Multimedia, WebEngineQuick)
 - **QML** 用于界面，C++17 提供后端逻辑
 - **libcurl** 实现下载功能
-- **Windows API**：分辨率更改、关机重启（检测 `pecmd.ini` 以区分 PE 环境）
 - **CMake** 构建系统
 - 字体：Noto Color Emoji、思源黑体（Source Han Sans SC）
 
@@ -64,33 +63,7 @@
 - CMake 3.16+
 - Qt 6.8 或更高版本（包含所需组件）
 - Visual Studio 2019+ 或 MinGW（Windows）
-- libcurl（已提供预编译库在 `include/` 和 `lib/` 目录下）
-
-### 构建步骤
-
-1. 克隆仓库：
-   
-   ```bash
-   git clone https://github.com/yourname/ZiyanOS.git
-   cd ZiyanOS
-   ```
-
-2. 确保 Qt6 的 CMake 路径正确（可通过设置 `Qt6_DIR` 环境变量或直接安装到标准路径）。
-
-3. 使用 CMake 配置并生成项目：
-   
-   ```bash
-   mkdir build
-   cd build
-   cmake .. -DCMAKE_BUILD_TYPE=Release
-   cmake --build . --config Release
-   ```
-
-4. 运行生成的可执行文件：
-   
-   ```bash
-   ./ZiyanOS/ZiyanOS.exe   # Windows
-   ```
+- libcurl （需要自行安装开发包）
 
 ### 命令行参数
 
@@ -101,8 +74,8 @@
 ```
 ZiyanOS/
 ├── CMakeLists.txt                # 主构建文件
-├── include/                       # 第三方库头文件（curl）
-├── lib/                           # 第三方库文件（libcurl.lib, libcurl.dll）
+├── include/                       # 第三方库头文件
+├── lib/                           # 第三方库文件
 ├── src/
 │   ├── core/                       # 主程序入口
 │   ├── modules/                     # 功能模块
@@ -139,10 +112,6 @@ ZiyanOS/
 
 - 感谢 **HardwareLab** 提供精神支持。
 - 本项目在开发过程中使用了 **DeepSeek**（包括这个文档）进行代码辅助、问题解答和文档生成。DeepSeek 是由深度求索公司创造的 AI 助手，为项目的快速迭代提供了有力支持。
-
-## 贡献
-
-不接受任何贡献，仅用于展示。
 
 ## 许可证
 

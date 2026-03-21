@@ -9,7 +9,8 @@ ApplicationWindow {
     width: Screen.width
     height: Screen.height
     visible: false
-    flags: Qt.FramelessWindowHint
+    flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+    visibility: Window.FullScreen                             // 全屏模式
     title: "锁屏界面"
 
     // 信号：登录成功时触发

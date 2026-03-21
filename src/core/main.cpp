@@ -23,9 +23,8 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     // 2. 设置应用程序信息
-    app.setOrganizationName("Ziyan Studio");
     app.setApplicationName("ZiyanOS");
-    app.setApplicationVersion("1.2.1");
+    app.setApplicationVersion("2.0.0");
 
     // 3. 解析命令行参数
     QCommandLineParser parser;
@@ -44,7 +43,7 @@ int main(int argc, char *argv[])
     // 检查是否是异常重启
     bool restartAfterCrash = parser.isSet(restartOption);
 
-    // 4. 如果是从异常重启，检查并结束可能还在运行的鼠标覆盖程序
+    // 4. 如果是从异常重启，检查
     if (restartAfterCrash) {
         qInfo() << "检测到异常重启参数，上次可能是异常关闭";
     }
@@ -53,7 +52,6 @@ int main(int argc, char *argv[])
     qDebug() << "========== 应用程序启动 ==========";
     qDebug() << "应用程序名称:" << app.applicationName();
     qDebug() << "应用程序版本:" << app.applicationVersion();
-    qDebug() << "组织名称:" << app.organizationName();
 
     if (restartAfterCrash) {
         qInfo() << "上次异常关闭已恢复";
@@ -166,6 +164,9 @@ int main(int argc, char *argv[])
     // 暴露应用程序目录给 QML
     engine.rootContext()->setContextProperty("applicationDirPath",
                                              QCoreApplication::applicationDirPath());
+
+    // 暴露所使用的窗口服务器
+    engine.rootContext()->setContextProperty("platformName", QGuiApplication::platformName());
 
     // 18. 连接QML引擎对象创建失败信号
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,

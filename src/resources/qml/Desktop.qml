@@ -11,7 +11,8 @@ ApplicationWindow {
     width: Screen.width
     height: Screen.height
     visible: false
-    flags: Qt.FramelessWindowHint
+    flags: Qt.FramelessWindowHint | Qt.WindowStaysOnBottomHint
+    visibility: Window.FullScreen                             // 全屏模式
     title: "字研OS 桌面"
 
     // 关键修改：添加一个属性来标记是否允许关闭
@@ -52,9 +53,6 @@ ApplicationWindow {
 
     // 存储打开的窗口
     property var openWindows: []
-
-    property var compatModeWindow: null  // 当前兼容模式窗口
-    property var hiddenWindows: []        // 存储隐藏的窗口对象
 
     // 桌面背景
     Rectangle {
@@ -117,7 +115,6 @@ ApplicationWindow {
                     { iconText: "🎵", iconName: "音乐播放器", appType: "musicplayer", appId: "musicplayer" },
                     { iconText: "🎬", iconName: "视频播放器", appType: "videoplayer", appId: "videoplayer" },
                     { iconText: "⬇️", iconName: "下载管理器", appType: "downloadmanager", appId: "downloadmanager" },
-                    { iconText: "🍷", iconName: "Windows兼容层", appType: "winecompat", appId: "winecompat" },
                     { iconText: "⚙️", iconName: "设置", appType: "settings", appId: "settings" }
                 ]
 
@@ -358,15 +355,6 @@ ApplicationWindow {
     }
 
     Component {
-        id: wineCompatLayerComponent
-        WineCompatLayer {
-            onWindowClosing: {
-                removeWindow(this)
-            }
-        }
-    }
-
-    Component {
         id: settingsWindowComponent
         SettingsWindow {
             onWindowClosing: {
@@ -400,7 +388,6 @@ ApplicationWindow {
             case "videoplayer": return "🎬"
             case "downloadmanager": return "⬇️"
             case "settings": return "⚙️"
-            case "winecompat": return "🍷️"
             case "power": return "🔌"
             case "easteregg": return "🥚"
             default: return "📄"
@@ -460,11 +447,6 @@ ApplicationWindow {
                 break
             case "calculator":
                 window = calculatorWindowComponent.createObject(desktop)
-                break
-            case "winecompat":
-                window = wineCompatLayerComponent.createObject(desktop, {
-                    "desktop": desktop
-                })
                 break
             case "texteditor":
                 var filePath = "";
@@ -556,38 +538,6 @@ ApplicationWindow {
             })
             updateTaskbar()
         }
-    }
-
-    // 进入兼容模式
-    function enterCompatMode(compatWindow) {
-        if (compatModeWindow) return
-        compatModeWindow = compatWindow
-
-        for (var i = openWindows.length - 1; i >= 0; i--) {
-            var winInfo = openWindows[i]
-            if (winInfo.window !== compatWindow) {
-                winInfo.window.close()
-            }
-        }
-
-        desktop.visible = false
-
-        if (!compatWindow.visible) {
-            compatWindow.showWindow()
-        } else {
-            compatWindow.raise()
-            compatWindow.requestActivate()
-        }
-    }
-
-    // 退出兼容模式
-    function exitCompatMode() {
-        if (!compatModeWindow) return
-        compatModeWindow = null
-
-        desktop.visible = true
-        desktop.raise()
-        desktop.requestActivate()
     }
 
     // 移除窗口
