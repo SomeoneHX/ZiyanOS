@@ -19,31 +19,18 @@ find_package(Qt6 REQUIRED COMPONENTS
 qt_standard_project_setup(REQUIRES 6.8)
 
 # ------------------------------------------------------------------
-# curl 子模块构建配置
+# 使用系统 curl 库（不再自行编译子模块）
 # ------------------------------------------------------------------
+find_package(CURL REQUIRED)
 
-# 检查子模块是否存在（若不存在则提示用户初始化）
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/curl/CMakeLists.txt")
-    message(FATAL_ERROR
-        "curl submodule not found. Please run:\n"
-        "  git submodule update --init --recursive"
+# 某些发行版可能不导出 CURL::libcurl 目标，则手动创建导入目标
+if(NOT TARGET CURL::libcurl)
+    add_library(CURL::libcurl UNKNOWN IMPORTED)
+    set_target_properties(CURL::libcurl PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}"
+        IMPORTED_LOCATION "${CURL_LIBRARIES}"
     )
 endif()
-
-# 设置 curl 构建选项（根据需求调整）
-set(CURL_USE_SCHANNEL ON  CACHE BOOL "使用 Windows 原生 SSL (Schannel)" FORCE)   # Windows 内置 SSL，无需 OpenSSL
-set(CURL_DISABLE_LDAP  ON  CACHE BOOL "禁用 LDAP" FORCE)
-set(CURL_DISABLE_TELNET ON CACHE BOOL "禁用 Telnet" FORCE)
-set(CURL_DISABLE_POP3  ON  CACHE BOOL "禁用 POP3" FORCE)
-set(CURL_DISABLE_IMAP  ON  CACHE BOOL "禁用 IMAP" FORCE)
-set(CURL_DISABLE_SMTP  ON  CACHE BOOL "禁用 SMTP" FORCE)
-set(CURL_DISABLE_RTSP  ON  CACHE BOOL "禁用 RTSP" FORCE)
-set(CURL_USE_LIBPSL     OFF CACHE BOOL "不使用 LIBPSL" FORCE)
-set(CURL_STATICLIB     OFF CACHE BOOL "构建动态库 (DLL)" FORCE)                   # 与原预编译库一致，动态链接
-# 若需要静态链接，可将上面改为 ON，并移除后续 DLL 复制步骤
-
-# 添加 curl 子目录
-add_subdirectory(third_party/curl)
 
 # ------------------------------------------------------------------
 # 收集所有C++源文件
@@ -130,7 +117,7 @@ qt_add_qml_module(ZiyanOS
         src/resources/fonts/SourceHanSansSC-Medium-2.otf
 )
 
-# 设置包含目录（已移除手动添加的 include/curl 路径，因为 curl 目标会自动处理）
+# 设置包含目录（系统 curl 头文件路径已通过 CURL::libcurl 自动处理）
 target_include_directories(ZiyanOS PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/filesystem
@@ -143,7 +130,7 @@ target_include_directories(ZiyanOS PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/network
 )
 
-# 链接Qt库和CURL库（使用 CURL::libcurl 目标）
+# 链接Qt库和CURL库
 target_link_libraries(ZiyanOS
     PRIVATE
         Qt6::Core
@@ -152,30 +139,12 @@ target_link_libraries(ZiyanOS
         Qt6::Gui
         Qt6::Multimedia
         Qt6::WebEngineQuick
-        CURL::libcurl          # 替换原有的 libcurl
+        CURL::libcurl
 )
 
-# Windows特定的链接库（curl 自身已处理依赖，但保留原有链接项无妨）
-if(WIN32)
-    target_link_libraries(ZiyanOS PRIVATE
-        ws2_32     # Winsock
-        crypt32    # Crypto API
-    )
-
-    # 复制 curl DLL 到输出目录（仅在动态库构建时）
-    if(NOT CURL_STATICLIB)
-        add_custom_command(TARGET ZiyanOS POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<TARGET_FILE:CURL::libcurl>"          # 生成器表达式，展开为 DLL 的完整路径
-            "$<TARGET_FILE_DIR:ZiyanOS>/"
-            COMMENT "Copying curl DLL to output directory"
-        )
-    endif()
-
-    # 设置Windows子系统
-    set_target_properties(ZiyanOS PROPERTIES
-        WIN32_EXECUTABLE TRUE
-    )
+# Linux 特定链接库（pthread、dl 通常为隐式依赖，显式添加确保兼容）
+if(LINUX)
+    target_link_libraries(ZiyanOS PRIVATE pthread dl)
 endif()
 
 # 设置目标属性
