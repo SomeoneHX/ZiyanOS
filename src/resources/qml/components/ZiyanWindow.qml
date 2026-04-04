@@ -241,7 +241,14 @@ Window {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 property point clickPos: "0,0"
-                onPressed: (mouse) => { clickPos = Qt.point(mouse.x, mouse.y) }
+                onPressed: (mouse) => {
+                    if (isWayland) {
+                        // Qt 6.5+ 支持
+                        ziyanWindow.startSystemMove()
+                    } else {
+                        clickPos = Qt.point(mouse.x, mouse.y)
+                    }
+                }
                 onPositionChanged: (mouse) => {
                     if (!isMaximized && !isWayland) {
                         var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y)
