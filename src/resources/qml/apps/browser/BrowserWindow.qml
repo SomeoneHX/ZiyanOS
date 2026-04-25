@@ -5,12 +5,11 @@ import QtWebEngine
 import ZiyanOS
 import ZiyanOS.Apps 1.0
 
-BaseAppWindow {
+ZiyanWindow {
     id: browserWindow
     width: 1024
     height: 768
     windowTitle: "浏览器"
-    appId: "browser"
 
     // 属性：初始URL，如果为空则显示欢迎页面
     property string initialUrl: ""

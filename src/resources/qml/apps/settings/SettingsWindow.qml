@@ -6,11 +6,10 @@ import ZiyanOS.WallpaperManager
 import ZiyanOS
 import ZiyanOS.Apps 1.0
 
-BaseAppWindow {
+ZiyanWindow {
     id: settingsWindow
     width: 800
     height: 600
-    appId: "settings"
     windowTitle: "设置"
 
     // 当前设置 - 从设置管理器获取

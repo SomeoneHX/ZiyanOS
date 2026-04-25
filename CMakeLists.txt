@@ -89,7 +89,6 @@ qt_add_qml_module(ZiyanOS
         # 通用组件
         src/resources/qml/components/DesktopIcon.qml
         src/resources/qml/components/ZiyanWindow.qml
-        src/resources/qml/components/BaseAppWindow.qml
         src/resources/qml/components/FilePicker.qml
         # 应用：计算器
         src/resources/qml/apps/calculator/CalculatorWindow.qml

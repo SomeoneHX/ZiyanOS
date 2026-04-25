@@ -6,13 +6,11 @@ import ZiyanOS.FileSystem
 import ZiyanOS
 import ZiyanOS.Apps 1.0
 
-BaseAppWindow {
+ZiyanWindow {
     id: musicPlayer
     width: 400
     height: 400
-    appId: "musicplayer"
     windowTitle: "音乐播放器"
-    contentBackground: "#2c3e50"
 
     property string currentMusicPath: ""
     property var fileSystem: FileSystem {}

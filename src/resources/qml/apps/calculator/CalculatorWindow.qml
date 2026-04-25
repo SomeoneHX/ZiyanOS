@@ -4,11 +4,10 @@ import QtQuick.Layouts
 import ZiyanOS
 import ZiyanOS.Apps 1.0
 
-BaseAppWindow {
+ZiyanWindow {
     id: calculatorWindow
     width: 300
     height: 400
-    appId: "calculator"
     windowTitle: "计算器"
 
     // 计算器状态

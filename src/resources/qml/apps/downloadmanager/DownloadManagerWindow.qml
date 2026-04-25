@@ -6,11 +6,10 @@ import ZiyanOS.FileSystem
 import ZiyanOS
 import ZiyanOS.Apps 1.0
 
-BaseAppWindow {
+ZiyanWindow {
     id: downloadWindow
     width: 500
     height: 450
-    appId: "downloadmanager"
     windowTitle: "下载管理器"
 
     property var filePicker: null

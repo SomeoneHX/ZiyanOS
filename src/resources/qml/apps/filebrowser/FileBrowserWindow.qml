@@ -5,11 +5,10 @@ import ZiyanOS.FileSystem
 import ZiyanOS
 import ZiyanOS.Apps 1.0
 
-BaseAppWindow {
+ZiyanWindow {
     id: fileBrowserWindow
     width: 800
     height: 600
-    appId: "filebrowser"
     windowTitle: "文件浏览器"
 
     property string currentPath: ""

@@ -4,11 +4,10 @@ import QtQuick.Controls
 import ZiyanOS
 import ZiyanOS.Apps 1.0
 
-BaseAppWindow {
+ZiyanWindow {
     id: easterEggWindow
     width: 400
     height: 200
-    appId: "easteregg"
     windowTitle: "🎉 彩蛋"
 
     contentItem: Item {

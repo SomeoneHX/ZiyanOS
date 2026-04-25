@@ -5,11 +5,10 @@ import ZiyanOS.FileSystem
 import ZiyanOS
 import ZiyanOS.Apps 1.0
 
-BaseAppWindow {
+ZiyanWindow {
     id: imageViewer
     width: 800
     height: 600
-    appId: "imageviewer"
     windowTitle: "图片查看器"
     contentBackground: "#2c3e50"
 
