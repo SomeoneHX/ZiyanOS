@@ -18,6 +18,7 @@ public:
     QString name;
     QString icon;
     QString emoji;
+    bool desktopVisible = true;
     LaunchType launchType = QmlComponent;
     QString launchTarget;   // QML 文件路径、可执行文件路径或 URL
     QStringList categories;

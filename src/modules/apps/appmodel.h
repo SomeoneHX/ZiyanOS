@@ -15,6 +15,7 @@ public:
         IconRole,
         EmojiRole,
         DisplayIconRole,
+        DesktopVisibleRole,
         CategoriesRole,
         IsSystemAppRole
     };

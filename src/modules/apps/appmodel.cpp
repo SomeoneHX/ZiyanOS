@@ -31,6 +31,8 @@ QVariant AppModel::data(const QModelIndex &index, int role) const
             return app.emoji.isEmpty() ? "📄" : app.emoji;
         return icon;
     }
+    case DesktopVisibleRole:
+        return app.desktopVisible;
     case CategoriesRole:
         return app.categories;
     case IsSystemAppRole:
@@ -48,6 +50,7 @@ QHash<int, QByteArray> AppModel::roleNames() const
     roles[IconRole] = "icon";
     roles[EmojiRole] = "emoji";
     roles[DisplayIconRole] = "displayIcon";
+    roles[DesktopVisibleRole] = "desktopVisible";
     roles[CategoriesRole] = "categories";
     roles[IsSystemAppRole] = "isSystemApp";
     return roles;

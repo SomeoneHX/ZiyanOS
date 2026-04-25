@@ -64,6 +64,7 @@ void AppRegistry::loadBuiltinApps()
         info.name = obj["name"].toString();
         info.icon = obj["icon"].toString();
         info.emoji = obj["emoji"].toString();
+        info.desktopVisible = obj["desktopVisible"].toBool(true);
         QString type = obj["launchType"].toString();
         if (type == "qml")
             info.launchType = AppInfo::QmlComponent;
@@ -111,6 +112,7 @@ void AppRegistry::loadUserApps()
         info.name = obj["name"].toString();
         info.icon = obj["icon"].toString();
         info.emoji = obj["emoji"].toString();
+        info.desktopVisible = obj["desktopVisible"].toBool(true);
         if (info.icon.startsWith("."))
             info.icon = appDir + "/" + info.icon; // 转为绝对路径
         QString type = obj["launchType"].toString();

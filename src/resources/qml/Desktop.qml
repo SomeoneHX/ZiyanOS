@@ -79,6 +79,7 @@ ApplicationWindow {
             model: AppRegistry.appModel
 
             delegate: DesktopIcon {
+                visible: model.desktopVisible !== false
                 iconText: model.displayIcon || "📄"
                 iconName: model.name
                 onClicked: {

@@ -103,6 +103,7 @@
         "name": "彩蛋",
         "icon": "qrc:/qt/qml/ZiyanOS/src/resources/assets/easteregg.png",
         "emoji": "🥚",
+        "desktopVisible": false,
         "launchType": "qml",
         "launchTarget": "qrc:/qt/qml/ZiyanOS/src/resources/qml/apps/easteregg/EasterEggWindow.qml",
         "categories": ["fun"],
