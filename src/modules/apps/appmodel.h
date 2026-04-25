@@ -13,6 +13,8 @@ public:
         AppIdRole = Qt::UserRole + 1,
         NameRole,
         IconRole,
+        EmojiRole,
+        DisplayIconRole,
         CategoriesRole,
         IsSystemAppRole
     };

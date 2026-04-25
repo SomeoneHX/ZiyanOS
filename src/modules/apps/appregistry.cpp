@@ -21,6 +21,7 @@ AppRegistry::AppRegistry(QObject *parent)
     , m_appModel(new AppModel(this))
     , m_activeWindowsModel(new ActiveWindowsModel(this))
 {
+    m_activeWindowsModel->setAppRegistry(this);
     loadBuiltinApps();
     loadUserApps();
 
@@ -62,6 +63,7 @@ void AppRegistry::loadBuiltinApps()
         info.id = obj["id"].toString();
         info.name = obj["name"].toString();
         info.icon = obj["icon"].toString();
+        info.emoji = obj["emoji"].toString();
         QString type = obj["launchType"].toString();
         if (type == "qml")
             info.launchType = AppInfo::QmlComponent;
@@ -108,6 +110,7 @@ void AppRegistry::loadUserApps()
         info.id = obj["id"].toString();
         info.name = obj["name"].toString();
         info.icon = obj["icon"].toString();
+        info.emoji = obj["emoji"].toString();
         if (info.icon.startsWith("."))
             info.icon = appDir + "/" + info.icon; // 转为绝对路径
         QString type = obj["launchType"].toString();
@@ -252,6 +255,16 @@ void AppRegistry::updateActiveWindowsModel()
 QObject* AppRegistry::getWindowByIndex(int index) const
 {
     return m_activeWindowsModel->getWindow(index);
+}
+
+QString AppRegistry::getAppEmoji(const QString &appId) const
+{
+    auto it = std::find_if(m_apps.begin(), m_apps.end(),
+                           [&appId](const AppInfo &info) { return info.id == appId; });
+    if (it != m_apps.end() && !it->emoji.isEmpty()) {
+        return it->emoji;
+    }
+    return "📄";
 }
 
 void AppRegistry::updateAllWindowsSettings()

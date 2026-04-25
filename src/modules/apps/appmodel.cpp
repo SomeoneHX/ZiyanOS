@@ -23,6 +23,14 @@ QVariant AppModel::data(const QModelIndex &index, int role) const
         return app.name;
     case IconRole:
         return app.icon;
+    case EmojiRole:
+        return app.emoji;
+    case DisplayIconRole: {
+        QString icon = app.icon;
+        if (icon.startsWith("qrc:") || icon.startsWith("file:") || icon.isEmpty())
+            return app.emoji.isEmpty() ? "📄" : app.emoji;
+        return icon;
+    }
     case CategoriesRole:
         return app.categories;
     case IsSystemAppRole:
@@ -38,6 +46,8 @@ QHash<int, QByteArray> AppModel::roleNames() const
     roles[AppIdRole] = "appId";
     roles[NameRole] = "name";
     roles[IconRole] = "icon";
+    roles[EmojiRole] = "emoji";
+    roles[DisplayIconRole] = "displayIcon";
     roles[CategoriesRole] = "categories";
     roles[IsSystemAppRole] = "isSystemApp";
     return roles;

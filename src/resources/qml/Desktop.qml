@@ -79,14 +79,7 @@ ApplicationWindow {
             model: AppRegistry.appModel
 
             delegate: DesktopIcon {
-                // 将图标路径转换为文本（临时处理，建议改为图片）
-                iconText: {
-                    // 如果图标是 emoji 字符串，直接使用；否则取文件名或默认
-                    if (model.icon.startsWith("qrc:") || model.icon.startsWith("file:"))
-                        return "📄" // 默认图标
-                    else
-                        return model.icon
-                }
+                iconText: model.displayIcon || "📄"
                 iconName: model.name
                 onClicked: {
                     AppRegistry.launchApp(model.appId, {})
@@ -131,7 +124,7 @@ ApplicationWindow {
                     property int windowIndex: index
 
                     Text {
-                        text: model.icon ? model.icon : "📄"
+                        text: model.displayIcon || "📄"
                         color: "white"
                         font.pixelSize: 28
                         anchors.centerIn: parent

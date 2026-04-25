@@ -21,6 +21,7 @@ public:
 
     Q_INVOKABLE void launchApp(const QString &appId, const QVariantMap &parameters = QVariantMap());
     Q_INVOKABLE QObject* getWindowByIndex(int index) const;
+    Q_INVOKABLE QString getAppEmoji(const QString &appId) const;
     Q_INVOKABLE void registerWindow(QObject *window, const QString &appId);
     Q_INVOKABLE void unregisterWindow(QObject *window);
     Q_INVOKABLE void updateAllWindowsSettings();
