@@ -108,11 +108,10 @@ qt_add_qml_module(ZiyanOS
         src/resources/qml/apps/browser/MaintenancePage.qml
         # 应用：文件浏览器
         src/resources/qml/apps/filebrowser/FileBrowserWindow.qml
-        # 应用：设置
+# 应用：设置
         src/resources/qml/apps/settings/SettingsWindow.qml
         src/resources/qml/apps/settings/AboutPage.qml
         src/resources/qml/apps/settings/WallpaperPage.qml
-        src/resources/qml/apps/settings/WindowSettingsPage.qml
         src/resources/qml/apps/settings/ResolutionPage.qml
         src/resources/qml/apps/settings/NetworkPage.qml
         # 应用：下载管理器

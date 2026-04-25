@@ -24,7 +24,7 @@ public:
     Q_INVOKABLE QString getAppEmoji(const QString &appId) const;
     Q_INVOKABLE void registerWindow(QObject *window, const QString &appId);
     Q_INVOKABLE void unregisterWindow(QObject *window);
-    Q_INVOKABLE void updateAllWindowsSettings();
+    Q_INVOKABLE void updateWindowSettings();
 
 signals:
     void activeWindowsChanged();

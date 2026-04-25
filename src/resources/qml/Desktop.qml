@@ -33,14 +33,6 @@ ApplicationWindow {
             console.log("桌面壁纸改变:", wallpaper)
             desktopWallpaper = wallpaper
         }
-        onWindowTitleBarModeChanged: function(mode) {
-            console.log("窗口模式改变:", mode)
-            updateWindowSettings()
-        }
-        onWindowTitleBarColorChanged: function(color) {
-            console.log("窗口颜色改变:", color)
-            updateWindowSettings()
-        }
     }
 
     property string desktopBackground: settingsManager.desktopBackground
@@ -335,21 +327,6 @@ ApplicationWindow {
         }
     }
 
-    // 更新所有窗口的外观设置（遍历活动窗口）
-    function updateWindowSettings() {
-        var count = AppRegistry.activeWindowsModel.rowCount()
-        for (var i = 0; i < count; i++) {
-            var window = AppRegistry.getWindowByIndex(i)
-            if (window && window.globalWindowMode !== undefined) {
-                window.globalWindowMode = settingsManager.windowTitleBarMode
-                window.globalWindowColor = settingsManager.windowTitleBarColor
-                if (window.settingsManager !== undefined) {
-                    window.settingsManager = settingsManager
-                }
-            }
-        }
-    }
-
     // 激活指定索引的窗口
     function activateWindow(index) {
         var window = AppRegistry.getWindowByIndex(index)
@@ -375,15 +352,6 @@ ApplicationWindow {
 
         console.log("加载持久化壁纸设置")
         settingsManager.loadSettings()
-
-        settingsManager.windowTitleBarModeChanged.connect(function(mode) {
-            console.log("窗口模式改变:", mode)
-            updateWindowSettings()
-        })
-        settingsManager.windowTitleBarColorChanged.connect(function(color) {
-            console.log("窗口颜色改变:", color)
-            updateWindowSettings()
-        })
 
         visible = true
         raise()

@@ -52,62 +52,16 @@ void SettingsManager::setDesktopWallpaper(const QString &wallpaper)
     }
 }
 
-// 新增：窗口标题栏模式
-QString SettingsManager::windowTitleBarMode() const
-{
-    return m_windowTitleBarMode;
-}
-
-void SettingsManager::setWindowTitleBarMode(const QString &mode)
-{
-    if (m_windowTitleBarMode != mode) {
-        m_windowTitleBarMode = mode;
-        emit windowTitleBarModeChanged(mode);
-    }
-}
-
-bool SettingsManager::contentBlurEnabled() const
-{
-    return m_contentBlurEnabled;
-}
-
-void SettingsManager::setContentBlurEnabled(bool enabled)
-{
-    if (m_contentBlurEnabled != enabled) {
-        m_contentBlurEnabled = enabled;
-        emit contentBlurEnabledChanged(enabled);
-    }
-}
-
-// 新增：窗口标题栏颜色
-QString SettingsManager::windowTitleBarColor() const
-{
-    return m_windowTitleBarColor;
-}
-
-void SettingsManager::setWindowTitleBarColor(const QString &color)
-{
-    if (m_windowTitleBarColor != color) {
-        m_windowTitleBarColor = color;
-        emit windowTitleBarColorChanged(color);
-    }
-}
-
 void SettingsManager::saveSettings()
 {
     m_settings->setValue("Desktop/Background", m_desktopBackground);
     m_settings->setValue("Desktop/Wallpaper", m_desktopWallpaper);
-    m_settings->setValue("Window/TitleBarMode", m_windowTitleBarMode);
-    m_settings->setValue("Window/TitleBarColor", m_windowTitleBarColor);
     m_settings->setValue("Desktop/WallpaperName", m_currentWallpaperName);
     m_settings->setValue("Desktop/WallpaperDescription", m_currentWallpaperDescription);
-    m_settings->setValue("Window/ContentBlurEnabled", m_contentBlurEnabled);
     m_settings->sync();
 
     qDebug() << "设置已保存 - 背景:" << m_desktopBackground
-             << "壁纸:" << m_desktopWallpaper
-             << "窗口模式:" << m_windowTitleBarMode
-             << "窗口颜色:" << m_windowTitleBarColor;
+             << "壁纸:" << m_desktopWallpaper;
 }
 
 void SettingsManager::setWallpaperInfo(const QString &name, const QString &description)
@@ -132,23 +86,15 @@ void SettingsManager::loadSettings()
 {
     m_desktopBackground = m_settings->value("Desktop/Background", "#1a1a1a").toString();
     m_desktopWallpaper = m_settings->value("Desktop/Wallpaper", "").toString();
-    m_windowTitleBarMode = m_settings->value("Window/TitleBarMode", "auto").toString();
-    m_windowTitleBarColor = m_settings->value("Window/TitleBarColor", "#3498db").toString();
     m_currentWallpaperName = m_settings->value("Desktop/WallpaperName", "").toString();
     m_currentWallpaperDescription = m_settings->value("Desktop/WallpaperDescription", "").toString();
-    m_contentBlurEnabled = m_settings->value("Window/ContentBlurEnabled", false).toBool();
 
     qDebug() << "设置已加载 - 背景:" << m_desktopBackground
-             << "壁纸:" << m_desktopWallpaper
-             << "窗口模式:" << m_windowTitleBarMode
-             << "窗口颜色:" << m_windowTitleBarColor;
+             << "壁纸:" << m_desktopWallpaper;
 
     // 发出信号通知属性已加载
     emit desktopBackgroundChanged(m_desktopBackground);
     emit desktopWallpaperChanged(m_desktopWallpaper);
-    emit windowTitleBarModeChanged(m_windowTitleBarMode);
-    emit windowTitleBarColorChanged(m_windowTitleBarColor);
-    emit contentBlurEnabledChanged(m_contentBlurEnabled);
 }
 
 // 新增：初始化壁纸目录

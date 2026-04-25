@@ -269,7 +269,7 @@ QString AppRegistry::getAppEmoji(const QString &appId) const
     return "📄";
 }
 
-void AppRegistry::updateAllWindowsSettings()
+void AppRegistry::updateWindowSettings()
 {
     for (QObject *window : m_activeWindows) {
         QMetaObject::invokeMethod(window, "updateWindowSettings", Qt::QueuedConnection);

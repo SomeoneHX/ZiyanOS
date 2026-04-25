@@ -15,13 +15,9 @@ ZiyanWindow {
     // 当前设置 - 从设置管理器获取
     property string currentBackground: settingsManager.desktopBackground
     property string currentWallpaper: settingsManager.desktopWallpaper
-    property string currentWindowMode: settingsManager.windowTitleBarMode
-    property string currentWindowColor: settingsManager.windowTitleBarColor
 
     // 信号：壁纸改变时通知桌面更新
     signal wallpaperChanged(string background, string wallpaperPath, string wallpaperName, string wallpaperDescription)
-    // 窗口设置改变信号
-    signal windowSettingsChanged(string mode, string color)
 
     // 创建设置管理器实例
     SettingsManager {
@@ -196,27 +192,6 @@ ZiyanWindow {
                             }
                         }
 
-                        // 窗口设置页面
-                        WindowSettingsPage {
-                            width: parent.width
-                            currentWindowMode: settingsWindow.currentWindowMode
-                            currentWindowColor: settingsWindow.currentWindowColor
-
-                            onWindowSettingsChanged: (mode, color) => {
-                                console.log("窗口设置改变，模式:", mode, "颜色:", color)
-                                // 更新设置管理器
-                                settingsManager.windowTitleBarMode = mode
-                                settingsManager.windowTitleBarColor = color
-                                settingsManager.saveSettings()
-
-                                // 更新当前值以便预览
-                                settingsWindow.currentWindowMode = mode
-                                settingsWindow.currentWindowColor = color
-
-                                AppRegistry.updateWindowSettings()
-                            }
-                        }
-
                         // 分辨率设置页面
                         ResolutionPage {
                             width: parent.width
@@ -254,6 +229,5 @@ ZiyanWindow {
         }
         settingsStack.currentIndex = 0
         console.log("壁纸目录:", settingsManager.getWallpaperDir())
-        console.log("窗口设置加载完成 - 模式:", currentWindowMode, "颜色:", currentWindowColor)
     }
 }

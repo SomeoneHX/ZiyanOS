@@ -16,7 +16,7 @@ Window {
     // 公共属性
     property bool isWayland: platformName === "wayland"
     property string windowTitle: "窗口"
-    property color titleBarColor: calculateTitleBarColor()
+    property color titleBarColor: contentBackground
     property alias contentItem: contentContainer.data
     property color contentBackground: "#ecf0f1"
     property bool allowClose: true
@@ -25,9 +25,6 @@ Window {
     property var desktop: null
     property var settingsManager: null
     property var effectiveSettingsManager: settingsManager || (desktop ? desktop.settingsManager : null)
-
-    // 内容模糊开关状态（从设置管理器获取）
-    // 已删除
 
     // 标题栏颜色透明度
     property real titleBarColorOpacity: 0.5
@@ -52,10 +49,6 @@ Window {
     property point originalPosition: Qt.point(0, 0)
     property size originalSize: Qt.size(0, 0)
     property bool isMaximized: false
-
-    // 全局窗口设置
-    property string globalWindowMode: "auto"
-    property string globalWindowColor: "#3498db"
 
     // 控制按钮显示
     property bool showMinimizeButton: true
@@ -520,19 +513,7 @@ Window {
         }
     }
 
-    // ---------- 辅助函数 ----------
-    function calculateTitleBarColor() {
-        var mgr = effectiveSettingsManager
-        if (mgr) {
-            globalWindowMode = mgr.windowTitleBarMode || "auto"
-            globalWindowColor = mgr.windowTitleBarColor || "#3498db"
-        } else if (desktop && desktop.settingsManager) {
-            globalWindowMode = desktop.settingsManager.windowTitleBarMode || "auto"
-            globalWindowColor = desktop.settingsManager.windowTitleBarColor || "#3498db"
-        }
-        return globalWindowMode === "custom" ? globalWindowColor : contentBackground
-    }
-
+// ---------- 辅助函数 ----------
     function calculateTextColor(backgroundColor) {
         var r = backgroundColor.r * 255
         var g = backgroundColor.g * 255
@@ -541,19 +522,6 @@ Window {
         return luminance > 0.5 ? "black" : "white"
     }
 
-    // 属性变化处理
-    onGlobalWindowModeChanged: {
-        titleBarColor = calculateTitleBarColor()
-        titleTextColor = calculateTextColor(titleBarColor)
-    }
-    onGlobalWindowColorChanged: {
-        titleBarColor = calculateTitleBarColor()
-        titleTextColor = calculateTextColor(titleBarColor)
-    }
-    onContentBackgroundChanged: {
-        titleBarColor = calculateTitleBarColor()
-        titleTextColor = calculateTextColor(titleBarColor)
-    }
     onTitleBarColorChanged: {
         titleTextColor = calculateTextColor(titleBarColor)
     }
@@ -626,6 +594,10 @@ Window {
                 maximizeAnimation.start()
             }
         }
+    }
+
+    function updateWindowSettings() {
+        // 窗口设置功能已移除
     }
 
     onVisibilityChanged: {
