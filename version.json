@@ -1,6 +1,6 @@
 {
     "version": "2.0.0",
-    "build_type": "release",
+    "build_type": "Develop",
     "build_info": {
         "build_time": "@TIME@",
         "git_commit": "@GIT_COMMIT@",
