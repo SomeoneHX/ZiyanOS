@@ -25,42 +25,16 @@ ApplicationWindow {
     property string desktopBackground: settingsManager.desktopBackground
     property string desktopWallpaper: settingsManager.desktopWallpaper
 
-    // 模糊半径（可调整）
-    property int blurRadius: 16
-
-    // 背景（壁纸） - 支持图片高斯模糊
     Rectangle {
         anchors.fill: parent
-        // 当无壁纸图片时显示纯色背景
         color: desktopWallpaper === "" ? desktopBackground : "transparent"
 
-        // 图片壁纸层（包含模糊处理）
-        Item {
+        Image {
+            id: wallpaperImage
             anchors.fill: parent
+            source: desktopWallpaper
+            fillMode: Image.PreserveAspectCrop
             visible: desktopWallpaper !== ""
-
-            // 原始图片（仅作为模糊源，不直接显示）
-            Image {
-                id: wallpaperImage
-                anchors.fill: parent
-                source: desktopWallpaper
-                fillMode: Image.PreserveAspectCrop
-                visible: false  // 隐藏原始图片
-            }
-
-            // 高斯模糊效果
-            GaussianBlur {
-                anchors.fill: parent
-                source: wallpaperImage
-                radius: blurRadius
-                samples: blurRadius * 2  // 采样数通常为半径的2倍
-            }
-        }
-
-        // 半透明黑色遮罩层（始终显示，增强文字可读性）
-        Rectangle {
-            anchors.fill: parent
-            color: "#80000000"
         }
     }
 

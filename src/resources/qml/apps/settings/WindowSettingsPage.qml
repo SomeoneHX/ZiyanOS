@@ -32,30 +32,6 @@ Item {
             color: "Red"
         }
 
-        // 模糊扩展开关
-        Row {
-            spacing: 10
-            width: parent.width
-
-            Text {
-                text: "模糊扩展（实验性）"
-                color: "#2c3e50"
-                font.pixelSize: 14
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Switch {
-                id: contentBlurSwitch
-                checked: settingsManager ? settingsManager.contentBlurEnabled : false
-                onCheckedChanged: {
-                    if (settingsManager) {
-                        settingsManager.contentBlurEnabled = checked
-                        settingsManager.saveSettings()
-                    }
-                }
-            }
-        }
-
         // 窗口模式选择（不再使用内部 Column 的 spacing，完全依赖外层）
         Column {
             width: parent.width

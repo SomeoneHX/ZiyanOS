@@ -22,33 +22,23 @@ ApplicationWindow {
 
     property string desktopBackground: settingsManager.desktopBackground
     property string desktopWallpaper: settingsManager.desktopWallpaper
-    property int blurRadius: 16
     property bool hasPecmdIni: systemUtils.hasPecmdIni()
 
     // 标志：是否由取消按钮触发关闭
     property bool __cancelledByUser: false
 
-    // 背景（高斯模糊 + 遮罩）
     Rectangle {
         anchors.fill: parent
         color: desktopWallpaper === "" ? desktopBackground : "transparent"
-        Item {
+
+        Image {
+            id: wallpaperImage
             anchors.fill: parent
+            source: desktopWallpaper
+            fillMode: Image.PreserveAspectCrop
             visible: desktopWallpaper !== ""
-            Image {
-                id: wallpaperImage
-                anchors.fill: parent
-                source: desktopWallpaper
-                fillMode: Image.PreserveAspectCrop
-                visible: false
-            }
-            GaussianBlur {
-                anchors.fill: parent
-                source: wallpaperImage
-                radius: blurRadius
-                samples: blurRadius * 2
-            }
         }
+
         Rectangle {
             anchors.fill: parent
             color: "#80000000"

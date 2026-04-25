@@ -108,20 +108,6 @@ ApplicationWindow {
         height: 60
         anchors.bottom: parent.bottom
 
-        ShaderEffectSource {
-            id: blurSource
-            sourceItem: desktopBackgroundRect
-            sourceRect: Qt.rect(0, desktop.height - taskbar.height, taskbar.width, taskbar.height)
-            live: true
-        }
-
-        GaussianBlur {
-            anchors.fill: parent
-            source: blurSource
-            radius: 8
-            samples: 16
-        }
-
         Rectangle {
             anchors.fill: parent
             color: "#2c3e50"

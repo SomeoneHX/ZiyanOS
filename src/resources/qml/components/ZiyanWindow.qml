@@ -27,7 +27,7 @@ Window {
     property var effectiveSettingsManager: settingsManager || (desktop ? desktop.settingsManager : null)
 
     // 内容模糊开关状态（从设置管理器获取）
-    property bool contentBlurEnabled: effectiveSettingsManager ? effectiveSettingsManager.contentBlurEnabled : false
+    // 已删除
 
     // 标题栏颜色透明度
     property real titleBarColorOpacity: 0.5
@@ -109,14 +109,6 @@ Window {
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
                     cache: true
-                }
-
-                FastBlur {
-                    anchors.fill: titleBarWallpaper
-                    source: titleBarWallpaper
-                    radius: 32
-                    visible: titleBarWallpaper.visible
-                    cached: true
                 }
 
                 Rectangle {
@@ -261,7 +253,7 @@ Window {
             }
         }
 
-        // ---------- 内容区域（支持模糊扩展） ----------
+        // ---------- 内容区域 ----------
         Item {
             id: contentArea
             width: parent.width
@@ -269,65 +261,12 @@ Window {
             anchors.top: titleBar.bottom
             clip: true
 
-            // 内容区域在屏幕上的左上角坐标
-            readonly property real screenX: ziyanWindow.x
-            readonly property real screenY: ziyanWindow.y + titleBar.height
-
-            // 纯色背景（模糊关闭时显示）
             Rectangle {
                 id: contentSolidBackground
                 anchors.fill: parent
                 color: ziyanWindow.contentBackground
-                visible: !ziyanWindow.contentBlurEnabled
             }
 
-            // 模糊背景层（模糊开启时显示）
-            Item {
-                id: contentBlurBackground
-                anchors.fill: parent
-                clip: true
-                visible: ziyanWindow.contentBlurEnabled
-
-                Image {
-                    id: contentWallpaper
-                    visible: effectiveSettingsManager && effectiveSettingsManager.desktopWallpaper !== ""
-                    source: effectiveSettingsManager ? effectiveSettingsManager.desktopWallpaper : ""
-                    width: Screen.width
-                    height: Screen.height
-                    x: -contentArea.screenX
-                    y: -contentArea.screenY
-                    fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
-                    cache: true
-                }
-
-                FastBlur {
-                    anchors.fill: contentWallpaper
-                    source: contentWallpaper
-                    radius: 32
-                    visible: contentWallpaper.visible
-                    cached: true
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    color: effectiveSettingsManager ? effectiveSettingsManager.desktopBackground : "#ecf0f1"
-                    visible: !contentWallpaper.visible
-                }
-            }
-
-            // 半透明颜色层（模糊开启时显示）
-            Rectangle {
-                id: contentColorLayer
-                anchors.fill: parent
-                color: ziyanWindow.contentBackground
-                opacity: (effectiveSettingsManager && effectiveSettingsManager.desktopWallpaper !== "")
-                         ? ziyanWindow.titleBarColorOpacity   // 有壁纸时保持半透明
-                         : 1.0                                 // 无壁纸时强制不透明
-                visible: ziyanWindow.contentBlurEnabled
-            }
-
-            // 实际内容容器
             Item {
                 id: contentContainer
                 anchors.fill: parent
