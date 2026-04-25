@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
-import ZiyanOS.SettingsManager
 
 ApplicationWindow {
     id: lockScreen
@@ -16,26 +15,12 @@ ApplicationWindow {
     // 信号：登录成功时触发
     signal loginSuccessful()
 
-    // 设置管理器
-    SettingsManager {
-        id: settingsManager
-    }
-
-    // 壁纸属性
-    property string desktopBackground: settingsManager.desktopBackground
-    property string desktopWallpaper: settingsManager.desktopWallpaper
+    // 固定背景色
+    property string lockBackground: "#1a1a1a"
 
     Rectangle {
         anchors.fill: parent
-        color: desktopWallpaper === "" ? desktopBackground : "transparent"
-
-        Image {
-            id: wallpaperImage
-            anchors.fill: parent
-            source: desktopWallpaper
-            fillMode: Image.PreserveAspectCrop
-            visible: desktopWallpaper !== ""
-        }
+        color: lockBackground
     }
 
     // 顶部时间区域 - 固定在顶部
@@ -160,9 +145,6 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        // 加载壁纸设置
-        settingsManager.loadSettings()
-
         // 初始更新时间
         var currentTime = new Date()
 

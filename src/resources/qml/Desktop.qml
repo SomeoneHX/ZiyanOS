@@ -29,27 +29,15 @@ ApplicationWindow {
             console.log("桌面背景改变:", background)
             desktopBackground = background
         }
-        onDesktopWallpaperChanged: function(wallpaper) {
-            console.log("桌面壁纸改变:", wallpaper)
-            desktopWallpaper = wallpaper
-        }
     }
 
     property string desktopBackground: settingsManager.desktopBackground
-    property string desktopWallpaper: settingsManager.desktopWallpaper
 
     // 背景
     Rectangle {
         anchors.fill: parent
         id: desktopBackgroundRect
-        color: desktopWallpaper === "" ? desktopBackground : "transparent"
-
-        Image {
-            anchors.fill: parent
-            source: desktopWallpaper
-            fillMode: Image.PreserveAspectCrop
-            visible: desktopWallpaper !== ""
-        }
+        color: desktopBackground
 
         // 桌面图标区域：使用 AppRegistry 的应用模型
         GridView {
@@ -336,21 +324,13 @@ ApplicationWindow {
         }
     }
 
-    // 壁纸变化处理（由设置页面调用）
-    function handleWallpaperChanged(background, wallpaperPath) {
-        console.log("壁纸改变:", background, wallpaperPath)
-        settingsManager.desktopBackground = background
-        settingsManager.desktopWallpaper = wallpaperPath
-        settingsManager.saveSettings()
-    }
-
     // 组件完成时初始化
     Component.onCompleted: {
         var currentTime = new Date()
         dateText.text = currentTime.toLocaleDateString(Qt.locale(), "yyyy-MM-dd dddd")
         timeText.text = currentTime.toLocaleTimeString(Qt.locale(), "hh:mm:ss")
 
-        console.log("加载持久化壁纸设置")
+        console.log("加载持久化设置")
         settingsManager.loadSettings()
 
         visible = true

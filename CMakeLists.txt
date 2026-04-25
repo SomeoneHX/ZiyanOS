@@ -44,7 +44,6 @@ set(CPP_SOURCES
     src/modules/system/SystemUtils.cpp
     src/modules/download/DownloadManager.cpp
     src/modules/logging/LogManager.cpp
-    src/modules/wallpaper/WallpaperManager.cpp
     src/modules/network/network.cpp
     src/core/main.cpp
 )
@@ -60,7 +59,6 @@ set(HEADER_FILES
     src/modules/system/SystemUtils.h
     src/modules/download/DownloadManager.h
     src/modules/logging/LogManager.h
-    src/modules/wallpaper/WallpaperManager.h
     src/modules/network/network.h
 )
 
@@ -111,7 +109,6 @@ qt_add_qml_module(ZiyanOS
 # 应用：设置
         src/resources/qml/apps/settings/SettingsWindow.qml
         src/resources/qml/apps/settings/AboutPage.qml
-        src/resources/qml/apps/settings/WallpaperPage.qml
         src/resources/qml/apps/settings/ResolutionPage.qml
         src/resources/qml/apps/settings/NetworkPage.qml
         # 应用：下载管理器
@@ -136,7 +133,6 @@ target_include_directories(ZiyanOS PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/download
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/mouseoverlay
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/logging
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/wallpaper
     ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/network
 )
 

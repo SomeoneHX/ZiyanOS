@@ -21,13 +21,8 @@ Window {
     property color contentBackground: "#ecf0f1"
     property bool allowClose: true
 
-    // 桌面和设置管理器引用
-    property var desktop: null
-    property var settingsManager: null
-    property var effectiveSettingsManager: settingsManager || (desktop ? desktop.settingsManager : null)
-
     // 标题栏颜色透明度
-    property real titleBarColorOpacity: 0.5
+    property real titleBarColorOpacity: 1.0
     // 计算标题栏文本颜色
     property color titleTextColor: calculateTextColor(titleBarColor)
 
@@ -85,42 +80,15 @@ Window {
             bottomLeftRadius: 0
             bottomRightRadius: 0
 
-            // ---- 1. 模糊背景层（最底层） ----
-            Item {
-                anchors.fill: parent
-                clip: true
-                z: 0
-
-                Image {
-                    id: titleBarWallpaper
-                    visible: effectiveSettingsManager && effectiveSettingsManager.desktopWallpaper !== ""
-                    source: effectiveSettingsManager ? effectiveSettingsManager.desktopWallpaper : ""
-                    width: Screen.width
-                    height: Screen.height
-                    x: -ziyanWindow.x
-                    y: -ziyanWindow.y
-                    fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
-                    cache: true
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    color: effectiveSettingsManager ? effectiveSettingsManager.desktopBackground : "#ecf0f1"
-                    visible: !titleBarWallpaper.visible
-                }
-            }
-
-            // ---- 2. 半透明颜色层（中层） ----
+            // ---- 1. 标题栏背景层 ----
             Rectangle {
                 anchors.fill: parent
                 color: ziyanWindow.titleBarColor
-                opacity: (effectiveSettingsManager && effectiveSettingsManager.desktopWallpaper !== "")
-                         ? ziyanWindow.titleBarColorOpacity   // 有壁纸时保持半透明
-                         : 1.0                                 // 无壁纸时强制不透明
-                z: 1
+                opacity: ziyanWindow.titleBarColorOpacity
+                z: 0
             }
-            // ---- 3. 文字和按钮层（上层） ----
+
+            // ---- 2. 文字和按钮层（上层） ----
             Text {
                 text: ziyanWindow.windowTitle
                 color: titleTextColor

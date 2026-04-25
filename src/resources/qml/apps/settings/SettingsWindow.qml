@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import ZiyanOS.SettingsManager
-import ZiyanOS.WallpaperManager
 import ZiyanOS
 import ZiyanOS.Apps 1.0
 
@@ -11,23 +10,6 @@ ZiyanWindow {
     width: 800
     height: 600
     windowTitle: "设置"
-
-    // 当前设置 - 从设置管理器获取
-    property string currentBackground: settingsManager.desktopBackground
-    property string currentWallpaper: settingsManager.desktopWallpaper
-
-    // 信号：壁纸改变时通知桌面更新
-    signal wallpaperChanged(string background, string wallpaperPath, string wallpaperName, string wallpaperDescription)
-
-    // 创建设置管理器实例
-    SettingsManager {
-        id: settingsManager
-    }
-
-    // 创建壁纸管理器实例
-    WallpaperManager {
-        id: wallpaperManager
-    }
 
     contentItem: Item {
         anchors.fill: parent
@@ -70,14 +52,14 @@ ZiyanWindow {
                         }
                     }
 
-                    // 壁纸选项
+                    // 分辨率选项
                     Rectangle {
                         width: parent.width
                         height: 50
                         color: settingsStack.currentIndex === 1 ? "#34495e" : "transparent"
 
                         Text {
-                            text: "壁纸"
+                            text: "分辨率"
                             color: "white"
                             font.pixelSize: 14
                             font.bold: true
@@ -92,55 +74,11 @@ ZiyanWindow {
                         }
                     }
 
-                    // 窗口选项
-                    Rectangle {
-                        width: parent.width
-                        height: 50
-                        color: settingsStack.currentIndex === 2 ? "#34495e" : "transparent"
-
-                        Text {
-                            text: "窗口"
-                            color: "white"
-                            font.pixelSize: 14
-                            font.bold: true
-                            anchors.centerIn: parent
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                settingsStack.currentIndex = 2
-                            }
-                        }
-                    }
-
-                    // 分辨率选项
-                    Rectangle {
-                        width: parent.width
-                        height: 50
-                        color: settingsStack.currentIndex === 3 ? "#34495e" : "transparent"
-
-                        Text {
-                            text: "分辨率"
-                            color: "white"
-                            font.pixelSize: 14
-                            font.bold: true
-                            anchors.centerIn: parent
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                settingsStack.currentIndex = 3
-                            }
-                        }
-                    }
-
                     // 网络
                     Rectangle {
                         width: parent.width
                         height: 50
-                        color: settingsStack.currentIndex === 4 ? "#34495e" : "transparent"
+                        color: settingsStack.currentIndex === 2 ? "#34495e" : "transparent"
 
                         Text {
                             text: "网络"
@@ -153,7 +91,7 @@ ZiyanWindow {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
-                                settingsStack.currentIndex = 4
+                                settingsStack.currentIndex = 2
                             }
                         }
                     }
@@ -179,17 +117,6 @@ ZiyanWindow {
                         // 关于页面
                         AboutPage {
                             width: parent.width
-                        }
-
-                        // 壁纸页面
-                        WallpaperPage {
-                            width: parent.width
-                            currentBackground: settingsWindow.currentBackground
-                            currentWallpaper: settingsWindow.currentWallpaper
-
-                            onWallpaperChanged: {
-                                settingsWindow.wallpaperChanged(background, wallpaperPath, wallpaperName, wallpaperDescription)
-                            }
                         }
 
                         // 分辨率设置页面
@@ -228,6 +155,5 @@ ZiyanWindow {
             })
         }
         settingsStack.currentIndex = 0
-        console.log("壁纸目录:", settingsManager.getWallpaperDir())
     }
 }

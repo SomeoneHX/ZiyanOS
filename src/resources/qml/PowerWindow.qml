@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import ZiyanOS.SystemUtils 1.0
-import ZiyanOS.SettingsManager
 
 ApplicationWindow {
     id: powerWindow
@@ -18,10 +17,9 @@ ApplicationWindow {
     signal cancelled()
 
     SystemUtils { id: systemUtils }
-    SettingsManager { id: settingsManager }
 
-    property string desktopBackground: settingsManager.desktopBackground
-    property string desktopWallpaper: settingsManager.desktopWallpaper
+    // 固定背景色
+    property string powerBackground: "#1a1a1a"
     property bool hasPecmdIni: systemUtils.hasPecmdIni()
 
     // 标志：是否由取消按钮触发关闭
@@ -29,15 +27,7 @@ ApplicationWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: desktopWallpaper === "" ? desktopBackground : "transparent"
-
-        Image {
-            id: wallpaperImage
-            anchors.fill: parent
-            source: desktopWallpaper
-            fillMode: Image.PreserveAspectCrop
-            visible: desktopWallpaper !== ""
-        }
+        color: powerBackground
 
         Rectangle {
             anchors.fill: parent
@@ -128,7 +118,7 @@ ApplicationWindow {
         }
     }
 
-    Component.onCompleted: settingsManager.loadSettings()
+    Component.onCompleted: {}
 
     onClosing: (close) => {
         // 如果不是由取消按钮触发的关闭（例如 Alt+F4），也视为取消
