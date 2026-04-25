@@ -16,6 +16,7 @@
 #include "LogManager.h"
 #include "network.h"
 #include "appregistry.h"
+#include "VersionManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -159,6 +160,13 @@ int main(int argc, char *argv[])
     qmlRegisterType<DownloadManager>("ZiyanOS.DownloadManager", 1, 0, "DownloadManager");
     qmlRegisterType<LogManager>("ZiyanOS.LogManager", 1, 0, "LogManager");
     qmlRegisterType<NetworkManager>("ZiyanOS.Network", 1, 0, "NetworkManager");
+    // 注册 VersionManager 单例到 QML
+    qmlRegisterSingletonType<VersionManager>("ZiyanOS.VersionManager", 1, 0, "VersionManager",
+                                         [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject* {
+                                             Q_UNUSED(engine);
+                                             Q_UNUSED(scriptEngine);
+                                             return VersionManager::instance();
+                                         });
     // 注册 AppRegistry 单例到 QML
     qmlRegisterSingletonType<AppRegistry>("ZiyanOS.Apps", 1, 0, "AppRegistry",
                                           [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject* {

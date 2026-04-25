@@ -2,13 +2,22 @@ import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import ZiyanOS.Apps 1.0
+import ZiyanOS.VersionManager 1.0
 
 Item {
     id: aboutPage
     implicitHeight: aboutContent.height
 
-    // 信号：连续点击5次版本号时触发
     signal easterEggTriggered()
+
+    Component.onCompleted: {
+        console.log("VersionManager loaded:")
+        console.log("  version:", VersionManager.version)
+        console.log("  buildTime:", VersionManager.buildTime)
+        console.log("  gitCommit:", VersionManager.gitCommit)
+        console.log("  gitBranch:", VersionManager.gitBranch)
+        console.log("  buildType:", VersionManager.buildType)
+    }
 
     Column {
         id: aboutContent
@@ -16,7 +25,6 @@ Item {
         spacing: 30
         padding: 40
 
-        // Logo容器
         Item {
             id: logoContainer
             width: 360
@@ -43,8 +51,6 @@ Item {
                 smooth: true
                 z: 1
                 playing: true
-
-                // 当当前帧变化时，检查是否为最后一帧，若是则停止播放
                 onCurrentFrameChanged: {
                     if (frameCount > 0 && currentFrame === frameCount - 1) {
                         playing = false
@@ -64,16 +70,14 @@ Item {
             }
         }
 
-        // 版本信息 - 可点击，用于触发彩蛋
         MouseArea {
             id: versionClickArea
-            width: versionText.width
-            height: versionText.height
+            width: versionColumn.width
+            height: versionColumn.height
             anchors.horizontalCenter: parent.horizontalCenter
             onClicked: {
                 versionClickCounter++
                 console.log("版本号被点击，次数:", versionClickCounter)
-
                 if (versionClickCounter >= 5) {
                     console.log("触发彩蛋！")
                     versionClickCounter = 0
@@ -94,15 +98,36 @@ Item {
                 }
             }
 
-            Text {
-                id: versionText
-                text: "版本 NEXT 2.0\n开发版本"
-                color: "#7f8c8d"
-                font.pixelSize: 16
+            Column {
+                id: versionColumn
+                spacing: 4
+                width: 300
+
+                Text {
+                    text: "版本 " + VersionManager.version + " (" + VersionManager.buildType + ")"
+                    color: "#2c3e50"
+                    font.pixelSize: 20
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    width: parent.width
+                }
+
+                Text {
+                    text: "构建时间: " + VersionManager.buildTime
+                    color: "#7f8c8d"
+                    font.pixelSize: 12
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                Text {
+                    text: "Git: " + VersionManager.gitBranch + " @" + VersionManager.gitCommit
+                    color: "#7f8c8d"
+                    font.pixelSize: 12
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
             }
         }
 
-        // 分隔线
         Rectangle {
             width: 200
             height: 1
@@ -110,17 +135,15 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        // 开发者信息
         Column {
             spacing: 8
-            anchors.horizontalCenter: parent.horizontalCenter
 
             Text {
                 text: "哔哩哔哩"
                 color: "#2c3e50"
                 font.pixelSize: 14
                 font.bold: true
-                anchors.horizontalCenter: parent.horizontalCenter
+                horizontalAlignment: Text.AlignHCenter
             }
 
             Text {
@@ -128,11 +151,10 @@ Item {
                 color: "#3498db"
                 font.pixelSize: 16
                 font.bold: true
-                anchors.horizontalCenter: parent.horizontalCenter
+                horizontalAlignment: Text.AlignHCenter
             }
         }
 
-        // ========= 感谢支持区域 =========
         Rectangle {
             width: 200
             height: 1
@@ -150,10 +172,8 @@ Item {
 
         Column {
             spacing: 20
-            anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width - 80
 
-            // 条目：hwl
             Row {
                 spacing: 15
                 width: parent.width
@@ -181,7 +201,6 @@ Item {
                 }
             }
 
-            // 条目：deepseek
             Row {
                 spacing: 15
                 width: parent.width
@@ -209,9 +228,7 @@ Item {
                 }
             }
         }
-        // ======================================
 
-        // 开源协议区域
         Rectangle {
             width: 200
             height: 1
@@ -227,11 +244,9 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        // 协议列表（网格布局，两列）
         Grid {
             columns: 2
             spacing: 20
-            anchors.horizontalCenter: parent.horizontalCenter
 
             Repeater {
                 model: [
@@ -260,8 +275,6 @@ Item {
                         onClicked: {
                             var filePath = applicationDirPath + "/licenses/" + modelData.file
                             console.log("打开协议文件:", filePath)
-
-                            // 使用应用管理器启动文本编辑器
                             if (typeof AppRegistry !== 'undefined') {
                                 AppRegistry.launchApp("texteditor", {
                                     filePath: filePath,

@@ -19,6 +19,8 @@
 #include <tchar.h>
 #endif
 
+#include "VersionManager.h"
+
 class SystemUtils : public QObject
 {
     Q_OBJECT
@@ -26,29 +28,24 @@ class SystemUtils : public QObject
 public:
     explicit SystemUtils(QObject *parent = nullptr);
 
-    // 检测是否存在 pecmd.ini 文件
     Q_INVOKABLE bool hasPecmdIni();
 
-    // 使用命令行执行关机
     Q_INVOKABLE void shutdownWithCommand();
 
-    // 使用命令行执行重启
     Q_INVOKABLE void rebootWithCommand();
 
-    // 正常退出应用
     Q_INVOKABLE void normalQuit();
 
     Q_INVOKABLE bool setResolution(int width, int height);
     Q_INVOKABLE bool restoreOriginalResolution();
 
-    // 启动程序并跟踪进程
     Q_INVOKABLE bool startProgram(const QString &program, const QString &arguments);
 
-    // 检查程序是否正在运行
     Q_INVOKABLE bool isProgramRunning();
 
-    // 终止正在运行的程序
     Q_INVOKABLE bool terminateProgram();
+
+    Q_INVOKABLE bool canRealShutdown();
 
 signals:
     void shutdownStarted();
@@ -56,7 +53,6 @@ signals:
     void rebootStarted();
     void rebootFailed(const QString& error);
 
-    // 程序状态信号
     void programStarted();
     void programFinished();
 
@@ -72,7 +68,6 @@ private:
     bool hasOriginalResolution = false;
     QProcess* shutdownProcess = nullptr;
 
-    // 当前运行的进程
     QProcess* currentProcess = nullptr;
 };
 

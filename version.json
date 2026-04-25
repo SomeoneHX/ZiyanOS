@@ -1,0 +1,13 @@
+{
+    "version": "2.0.0",
+    "build_type": "release",
+    "build_info": {
+        "build_time": "@TIME@",
+        "git_commit": "@GIT_COMMIT@",
+        "git_branch": "@GIT_BRANCH@"
+    },
+    "shutdown": {
+        "allow_real_shutdown": false,
+        "requires_confirmation": false
+    }
+}

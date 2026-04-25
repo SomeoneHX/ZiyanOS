@@ -214,6 +214,23 @@ QObject* AppRegistry::createQmlWindow(const AppInfo &info, const QVariantMap &pa
     // 设置应用 ID
     window->setProperty("appId", info.id);
 
+    // 传递参数到 QML（如 filePath）
+    for (auto it = params.constBegin(); it != params.constEnd(); ++it) {
+        window->setProperty(it.key().toUtf8(), it.value());
+    }
+
+    // 如果有 filePath 参数，调用 loadFile
+    if (params.contains("filePath")) {
+        QString filePath = params.value("filePath").toString();
+        bool isReadOnly = params.value("readOnly", false).toBool();
+        QMetaObject::invokeMethod(window, "loadFile", Qt::QueuedConnection,
+                                  Q_ARG(QVariant, filePath));
+        if (isReadOnly) {
+            QMetaObject::invokeMethod(window, "setReadOnly", Qt::QueuedConnection,
+                                      Q_ARG(QVariant, true));
+        }
+    }
+
     // 设置默认尺寸
     if (info.defaultSize.isValid()) {
         window->resize(info.defaultSize);

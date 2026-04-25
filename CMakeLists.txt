@@ -1,5 +1,57 @@
 cmake_minimum_required(VERSION 3.16)
 
+# ------------------------------------------------------------------
+# 版本管理配置（需要在 find_package 之前执行）
+# ------------------------------------------------------------------
+
+# 获取Git信息
+find_package(Git QUIET)
+if(GIT_FOUND)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT
+        TIMEOUT 5
+    )
+    string(STRIP "${GIT_COMMIT}" GIT_COMMIT)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_BRANCH
+        TIMEOUT 5
+    )
+    string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
+else()
+    set(GIT_COMMIT "unknown")
+    set(GIT_BRANCH "unknown")
+endif()
+
+# 获取构建时间
+string(TIMESTAMP ZIYANOS_BUILD_TIME)
+
+# 定义版本配置路径
+set(VERSION_JSON_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/version.json)
+set(VERSION_JSON_DEST ${CMAKE_BINARY_DIR}/bin/version.json)
+
+# 确保目标目录存在
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# 读取源配置文件
+file(READ ${VERSION_JSON_SOURCE} VERSION_JSON_CONTENT)
+
+# 替换变量 - 使用 @TIME@ 等不会被 CMake 解析的占位符
+string(REPLACE "@TIME@" "${ZIYANOS_BUILD_TIME}" VERSION_JSON_PROCESSED "${VERSION_JSON_CONTENT}")
+string(REPLACE "@GIT_COMMIT@" "${GIT_COMMIT}" VERSION_JSON_PROCESSED "${VERSION_JSON_PROCESSED}")
+string(REPLACE "@GIT_BRANCH@" "${GIT_BRANCH}" VERSION_JSON_PROCESSED "${VERSION_JSON_PROCESSED}")
+
+# 写入目标配置文件
+file(WRITE ${VERSION_JSON_DEST} "${VERSION_JSON_PROCESSED}")
+
+# 定义预处理宏，供C++代码使用
+add_compile_definitions(ZIYANOS_VERSION_JSON_PATH="${VERSION_JSON_DEST}")
+
+# ------------------------------------------------------------------
+
 project(ZiyanOS VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -33,6 +85,56 @@ if(NOT TARGET CURL::libcurl)
 endif()
 
 # ------------------------------------------------------------------
+# 版本管理配置
+# ------------------------------------------------------------------
+
+# 使用外部命令获取Git信息
+find_package(Git QUIET)
+if(GIT_FOUND)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT
+        TIMEOUT 5
+    )
+    string(STRIP "${GIT_COMMIT}" GIT_COMMIT)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_BRANCH
+        TIMEOUT 5
+    )
+    string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
+else()
+    set(GIT_COMMIT "unknown")
+    set(GIT_BRANCH "unknown")
+ endif()
+
+# 获取构建时间
+string(TIMESTAMP ZIYANOS_BUILD_TIME)
+
+# 定义版本配置路径
+set(VERSION_JSON_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/version.json)
+set(VERSION_JSON_DEST ${CMAKE_BINARY_DIR}/bin/version.json)
+
+# 确保目标目录存在
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# 读取源配置文件
+file(READ ${VERSION_JSON_SOURCE} VERSION_JSON_CONTENT)
+
+# 替换变量 - 使用 @TIME@ 等不会被 CMake 解析的占位符
+string(REPLACE "@TIME@" "${ZIYANOS_BUILD_TIME}" VERSION_JSON_PROCESSED "${VERSION_JSON_CONTENT}")
+string(REPLACE "@GIT_COMMIT@" "${GIT_COMMIT}" VERSION_JSON_PROCESSED "${VERSION_JSON_PROCESSED}")
+string(REPLACE "@GIT_BRANCH@" "${GIT_BRANCH}" VERSION_JSON_PROCESSED "${VERSION_JSON_PROCESSED}")
+
+# 写入目标配置文件
+file(WRITE ${VERSION_JSON_DEST} "${VERSION_JSON_PROCESSED}")
+
+# 定义预处理宏，供C++代码使用
+add_compile_definitions(ZIYANOS_VERSION_JSON_PATH="${VERSION_JSON_DEST}")
+
+# ------------------------------------------------------------------
 # 收集所有C++源文件
 set(CPP_SOURCES
     src/modules/apps/appinfo.cpp
@@ -41,6 +143,7 @@ set(CPP_SOURCES
     src/modules/apps/activewindowsmodel.cpp
     src/modules/filesystem/filesystem.cpp
     src/modules/settings/SettingsManager.cpp
+    src/modules/settings/VersionManager.cpp
     src/modules/system/SystemUtils.cpp
     src/modules/download/DownloadManager.cpp
     src/modules/logging/LogManager.cpp
@@ -56,6 +159,7 @@ set(HEADER_FILES
     src/modules/apps/activewindowsmodel.h
     src/modules/filesystem/filesystem.h
     src/modules/settings/SettingsManager.h
+    src/modules/settings/VersionManager.h
     src/modules/system/SystemUtils.h
     src/modules/download/DownloadManager.h
     src/modules/logging/LogManager.h
@@ -152,6 +256,10 @@ target_link_libraries(ZiyanOS
 if(LINUX)
     target_link_libraries(ZiyanOS PRIVATE pthread dl)
 endif()
+
+# 复制 licenses 目录到输出目录
+file(COPY ${CMAKE_SOURCE_DIR}/licenses
+     DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
 # 设置目标属性
 set_target_properties(ZiyanOS PROPERTIES

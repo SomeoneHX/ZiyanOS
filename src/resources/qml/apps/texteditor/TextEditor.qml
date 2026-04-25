@@ -429,6 +429,11 @@ ZiyanWindow {
         }
     }
 
+    // 设置只读模式（供外部调用）
+    function setReadOnly(value) {
+        readOnly = value
+    }
+
     // 保存文件
     function saveFile(filePath) {
         if (readOnly) return  // 只读模式下禁止保存

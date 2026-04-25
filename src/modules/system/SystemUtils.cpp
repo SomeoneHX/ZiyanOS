@@ -14,7 +14,6 @@ bool SystemUtils::hasPecmdIni()
         return false;
     }
 
-    // 修改为 System32\pecmd.ini
     QString pecmdIniPath = windowsPath + "\\System32\\pecmd.ini";
     QFileInfo pecmdFile(pecmdIniPath);
 
@@ -23,10 +22,19 @@ bool SystemUtils::hasPecmdIni()
 
     return exists;
 #else
-    // 非Windows系统直接返回false（视为实体机）
     qDebug() << "非Windows系统，视为实体机";
     return false;
 #endif
+}
+
+bool SystemUtils::canRealShutdown()
+{
+    VersionManager* vm = VersionManager::instance();
+    bool configAllow = vm->allowRealShutdown();
+
+    qDebug() << "VersionManager: allowRealShutdown =" << configAllow;
+
+    return configAllow;
 }
 
 bool SystemUtils::enableShutdownPrivilege()
@@ -277,89 +285,55 @@ bool SystemUtils::executeRebootCommand()
 
 void SystemUtils::shutdownWithCommand()
 {
+    bool canRealShutdown = this->canRealShutdown();
+
+    qDebug() << "shutdownWithCommand: canRealShutdown =" << canRealShutdown;
+
+    if (canRealShutdown) {
 #ifdef Q_OS_WINDOWS
-    QString windowsPath = getWindowsPath();
-    if (windowsPath.isEmpty()) {
-        qWarning() << "无法获取Windows目录，使用正常退出";
-        emit shutdownFailed("无法获取Windows目录");
-        QCoreApplication::quit();
-        return;
-    }
-
-    // 修改为 System32\pecmd.ini
-    QString pecmdIniPath = windowsPath + "\\System32\\pecmd.ini";
-    QFileInfo pecmdFile(pecmdIniPath);
-
-    if (pecmdFile.exists() && pecmdFile.isFile()) {
-        qDebug() << "检测到pecmd.ini，使用命令行执行关机";
-
         emit shutdownStarted();
-
-        // 仅使用命令行执行关机
         bool success = executeShutdownCommand("/s");
-
         if (success) {
             qDebug() << "关机命令已发送成功";
-
-            // 等待3秒后退出应用，给系统处理关机的时间
             QTimer::singleShot(3000, []() {
                 QCoreApplication::quit();
             });
         } else {
             qWarning() << "关机命令执行失败";
             emit shutdownFailed("关机命令执行失败");
-            // 直接退出应用，不再尝试API
             QCoreApplication::quit();
         }
-    } else {
-        // 没有检测到pecmd.ini，视为实体机，正常退出
-        qDebug() << "未检测到pecmd.ini，使用正常退出应用";
-        QCoreApplication::quit();
-    }
 #else
-    // 非Windows系统尝试执行关机命令
-    qDebug() << "非Windows系统，尝试执行关机命令";
-
-    emit shutdownStarted();
-
-    bool success = executeShutdownCommand("");
-
-    if (success) {
-        qDebug() << "关机命令已发送成功";
-        QTimer::singleShot(3000, []() {
+        qDebug() << "非Windows系统，尝试执行关机命令";
+        emit shutdownStarted();
+        bool success = executeShutdownCommand("");
+        if (success) {
+            qDebug() << "关机命令已发送成功";
+            QTimer::singleShot(3000, []() {
+                QCoreApplication::quit();
+            });
+        } else {
+            qWarning() << "关机命令执行失败";
+            emit shutdownFailed("关机命令执行失败");
             QCoreApplication::quit();
-        });
+        }
+#endif
     } else {
-        qWarning() << "关机命令执行失败";
-        emit shutdownFailed("关机命令执行失败");
+        qDebug() << "禁止真实关机，使用正常退出应用";
         QCoreApplication::quit();
     }
-#endif
 }
 
 void SystemUtils::rebootWithCommand()
 {
+    bool canRealShutdown = this->canRealShutdown();
+
+    qDebug() << "rebootWithCommand: canRealShutdown =" << canRealShutdown;
+
+    if (canRealShutdown) {
 #ifdef Q_OS_WINDOWS
-    QString windowsPath = getWindowsPath();
-    if (windowsPath.isEmpty()) {
-        qWarning() << "无法获取Windows目录，使用正常退出";
-        emit rebootFailed("无法获取Windows目录");
-        QCoreApplication::exit(0);
-        return;
-    }
-
-    // 修改为 System32\pecmd.ini
-    QString pecmdIniPath = windowsPath + "\\System32\\pecmd.ini";
-    QFileInfo pecmdFile(pecmdIniPath);
-
-    if (pecmdFile.exists() && pecmdFile.isFile()) {
-        qDebug() << "检测到pecmd.ini，使用命令行执行重启";
-
         emit rebootStarted();
-
-        // 仅使用命令行执行重启
         bool success = executeRebootCommand();
-
         if (success) {
             qDebug() << "重启命令已发送成功";
             QTimer::singleShot(3000, []() {
@@ -368,33 +342,27 @@ void SystemUtils::rebootWithCommand()
         } else {
             qWarning() << "重启命令执行失败";
             emit rebootFailed("重启命令执行失败");
-            // 直接退出应用，不再尝试API
             QCoreApplication::exit(1);
         }
-    } else {
-        // 没有检测到pecmd.ini，视为实体机，正常退出
-        qDebug() << "未检测到pecmd.ini，使用正常退出应用";
-        QCoreApplication::exit(0);
-    }
 #else
-    // 非Windows系统尝试执行重启命令
-    qDebug() << "非Windows系统，尝试执行重启命令";
-
-    emit rebootStarted();
-
-    bool success = executeRebootCommand();
-
-    if (success) {
-        qDebug() << "重启命令已发送成功";
-        QTimer::singleShot(3000, []() {
-            QCoreApplication::exit(1);
-        });
+        qDebug() << "非Windows系统，尝试执行重启命令";
+        emit rebootStarted();
+        bool success = executeRebootCommand();
+        if (success) {
+            qDebug() << "重启命令已发送成功";
+            QTimer::singleShot(3000, []() {
+                QCoreApplication::exit(1);
+            });
+        } else {
+            qWarning() << "重启命令执行失败";
+            emit rebootFailed("重启命令执行失败");
+            QCoreApplication::exit(0);
+        }
+#endif
     } else {
-        qWarning() << "重启命令执行失败";
-        emit rebootFailed("重启命令执行失败");
+        qDebug() << "禁止真实重启，使用正常退出应用";
         QCoreApplication::exit(0);
     }
-#endif
 }
 
 void SystemUtils::normalQuit()
