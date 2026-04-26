@@ -11,6 +11,7 @@ ZiyanWindow {
     width: 400
     height: 400
     windowTitle: "音乐播放器"
+    contentBackground: "#2c3e50"
 
     property string currentMusicPath: ""
     property var fileSystem: FileSystem {}

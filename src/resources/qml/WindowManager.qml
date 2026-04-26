@@ -6,9 +6,12 @@ ApplicationWindow {
     width: 1; height: 1; visible: false; title: "窗口管理器"
 
     property var currentWindow: null
+    property var desktopWindow: null
+    property var taskbarWindow: null
     property Component lockScreenComponent: null
     property Component desktopComponent: null
-    property Component powerMenuComponent: null   // 新增
+    property Component taskbarComponent: null
+    property Component powerMenuComponent: null
 
     function launch() { showLockScreen() }
 
@@ -26,22 +29,28 @@ ApplicationWindow {
 
     function showDesktop() {
         closeCurrentWindow()
+
         if (!desktopComponent) desktopComponent = Qt.createComponent("Desktop.qml")
         if (desktopComponent.status === Component.Ready) {
-            currentWindow = desktopComponent.createObject(null, { "windowManager": windowManager })
-            if (currentWindow) currentWindow.visible = true
+            desktopWindow = desktopComponent.createObject(null, { "windowManager": windowManager })
+            if (desktopWindow) desktopWindow.visible = true
+        }
+
+        if (!taskbarComponent) taskbarComponent = Qt.createComponent("Taskbar.qml")
+        if (taskbarComponent.status === Component.Ready) {
+            taskbarWindow = taskbarComponent.createObject(null, { "windowManager": windowManager })
+            if (taskbarWindow) taskbarWindow.visible = true
         }
     }
 
-    // 新增：显示电源菜单
     function showPowerMenu() {
         closeCurrentWindow()
         if (!powerMenuComponent) powerMenuComponent = Qt.createComponent("PowerWindow.qml")
         if (powerMenuComponent.status === Component.Ready) {
             currentWindow = powerMenuComponent.createObject(null)
             if (currentWindow) {
-                currentWindow.cancelled.connect(showDesktop)          // 取消 -> 返回桌面
-                currentWindow.requestDesktopClose.connect(Qt.quit)   // 关机/重启 -> 退出
+                currentWindow.cancelled.connect(showDesktop)
+                currentWindow.requestDesktopClose.connect(Qt.quit)
                 currentWindow.visible = true
             }
         }
@@ -49,9 +58,10 @@ ApplicationWindow {
 
     function closeCurrentWindow() {
         if (currentWindow) { currentWindow.close(); currentWindow.destroy(); currentWindow = null }
+        if (desktopWindow) { desktopWindow.close(); desktopWindow.destroy(); desktopWindow = null }
+        if (taskbarWindow) { taskbarWindow.close(); taskbarWindow.destroy(); taskbarWindow = null }
     }
 
-    // 供外部调用的切换函数
     function switchToDesktop() { showDesktop() }
     function switchToLockScreen() { showLockScreen() }
     function switchToPowerMenu() { showPowerMenu() }

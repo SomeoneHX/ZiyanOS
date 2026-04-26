@@ -182,8 +182,9 @@ qt_add_qml_module(ZiyanOS
     VERSION 1.0
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ZiyanOS
     QML_FILES
-        # 主桌面
+        # 主桌面和任务栏
         src/resources/qml/Desktop.qml
+        src/resources/qml/Taskbar.qml
         # 锁屏界面和主控制器
         src/resources/qml/LockScreen.qml
         src/resources/qml/WindowManager.qml
