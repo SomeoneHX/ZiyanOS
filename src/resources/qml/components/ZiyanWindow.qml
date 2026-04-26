@@ -195,8 +195,9 @@ Window {
                 anchors.bottom: parent.bottom
                 property point clickPos: "0,0"
                 onPressed: (mouse) => {
+                    ziyanWindow.raise()
+                    ziyanWindow.requestActivate()
                     if (isWayland) {
-                        // Qt 6.5+ 支持
                         ziyanWindow.startSystemMove()
                     } else {
                         clickPos = Qt.point(mouse.x, mouse.y)
