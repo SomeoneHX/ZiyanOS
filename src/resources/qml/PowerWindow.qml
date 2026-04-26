@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import ZiyanOS.SystemUtils 1.0
+import ZiyanOS.VersionManager 1.0
 
 ApplicationWindow {
     id: powerWindow
@@ -50,8 +51,8 @@ ApplicationWindow {
         spacing: 20
 
         Text {
-            text: hasPecmdIni ? "关机、重启将丢失未保存数据" : "非字研内核，关闭桌面"
-            color: hasPecmdIni ? "white" : "#3498db"
+            text: "关机、重启将丢失未保存数据"
+            color: "white"
             font.pixelSize: 14
             font.bold: true
             anchors.horizontalCenter: parent.horizontalCenter
@@ -64,17 +65,16 @@ ApplicationWindow {
             // 重启按钮
             Rectangle {
                 width: 120; height: 45
-                color: hasPecmdIni ? "#f39c12" : "#3498db"
+                color: "#f39c12"
                 radius: 8
                 Text { text: "重启"; color: "white"; font.pixelSize: 16; font.bold: true; anchors.centerIn: parent }
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: parent.color = hasPecmdIni ? "#d68910" : "#2980b9"
-                    onExited: parent.color = hasPecmdIni ? "#f39c12" : "#3498db"
+                    onEntered: parent.color = "#d68910"
+                    onExited: parent.color = "#f39c12"
                     onClicked: {
-                        if (hasPecmdIni) systemUtils.rebootWithCommand()
-                        else powerWindow.requestDesktopClose()
+                        systemUtils.rebootWithCommand()
                     }
                 }
             }
@@ -82,17 +82,34 @@ ApplicationWindow {
             // 关机按钮
             Rectangle {
                 width: 120; height: 45
-                color: hasPecmdIni ? "#e74c3c" : "#3498db"
+                color: "#e74c3c"
                 radius: 8
                 Text { text: "关机"; color: "white"; font.pixelSize: 16; font.bold: true; anchors.centerIn: parent }
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: parent.color = hasPecmdIni ? "#c0392b" : "#2980b9"
-                    onExited: parent.color = hasPecmdIni ? "#e74c3c" : "#3498db"
+                    onEntered: parent.color = "#c0392b"
+                    onExited: parent.color = "#e74c3c"
                     onClicked: {
-                        if (hasPecmdIni) systemUtils.shutdownWithCommand()
-                        else powerWindow.requestDesktopClose()
+                        systemUtils.shutdownWithCommand()
+                    }
+                }
+            }
+
+            // 退出按钮（根据配置决定是否显示）
+            Rectangle {
+                width: 120; height: 45
+                color: "#3498db"
+                radius: 8
+                visible: VersionManager.showExitButton
+                Text { text: "退出"; color: "white"; font.pixelSize: 16; font.bold: true; anchors.centerIn: parent }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: parent.color = "#2980b9"
+                    onExited: parent.color = "#3498db"
+                    onClicked: {
+                        Qt.quit()
                     }
                 }
             }

@@ -7,7 +7,6 @@
         "git_branch": "@GIT_BRANCH@"
     },
     "shutdown": {
-        "allow_real_shutdown": false,
-        "requires_confirmation": false
+        "show_exit_button": true
     }
 }

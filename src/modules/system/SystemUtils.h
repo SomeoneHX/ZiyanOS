@@ -45,8 +45,6 @@ public:
 
     Q_INVOKABLE bool terminateProgram();
 
-    Q_INVOKABLE bool canRealShutdown();
-
 signals:
     void shutdownStarted();
     void shutdownFailed(const QString& error);

@@ -14,7 +14,7 @@ class VersionManager : public QObject
     Q_PROPERTY(QString gitCommit READ gitCommit CONSTANT)
     Q_PROPERTY(QString gitBranch READ gitBranch CONSTANT)
     Q_PROPERTY(QString buildType READ buildType CONSTANT)
-    Q_PROPERTY(bool allowRealShutdown READ allowRealShutdown CONSTANT)
+    Q_PROPERTY(bool showExitButton READ showExitButton CONSTANT)
 
 public:
     explicit VersionManager(QObject *parent = nullptr);
@@ -28,8 +28,7 @@ public:
     QString gitBranch() const;
     QString buildType() const;
 
-    bool allowRealShutdown() const;
-    bool requiresConfirmation() const;
+    bool showExitButton() const;
 
     bool isValid() const;
 
@@ -42,8 +41,7 @@ private:
     QString m_gitBranch;
     QString m_buildType;
 
-    bool m_allowRealShutdown;
-    bool m_requiresConfirmation;
+    bool m_showExitButton;
 
     bool m_loaded = false;
 };

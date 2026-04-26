@@ -27,16 +27,6 @@ bool SystemUtils::hasPecmdIni()
 #endif
 }
 
-bool SystemUtils::canRealShutdown()
-{
-    VersionManager* vm = VersionManager::instance();
-    bool configAllow = vm->allowRealShutdown();
-
-    qDebug() << "VersionManager: allowRealShutdown =" << configAllow;
-
-    return configAllow;
-}
-
 bool SystemUtils::enableShutdownPrivilege()
 {
 #ifdef Q_OS_WINDOWS
@@ -285,84 +275,68 @@ bool SystemUtils::executeRebootCommand()
 
 void SystemUtils::shutdownWithCommand()
 {
-    bool canRealShutdown = this->canRealShutdown();
-
-    qDebug() << "shutdownWithCommand: canRealShutdown =" << canRealShutdown;
-
-    if (canRealShutdown) {
+    qDebug() << "执行关机命令";
 #ifdef Q_OS_WINDOWS
-        emit shutdownStarted();
-        bool success = executeShutdownCommand("/s");
-        if (success) {
-            qDebug() << "关机命令已发送成功";
-            QTimer::singleShot(3000, []() {
-                QCoreApplication::quit();
-            });
-        } else {
-            qWarning() << "关机命令执行失败";
-            emit shutdownFailed("关机命令执行失败");
+    emit shutdownStarted();
+    bool success = executeShutdownCommand("/s");
+    if (success) {
+        qDebug() << "关机命令已发送成功";
+        QTimer::singleShot(3000, []() {
             QCoreApplication::quit();
-        }
-#else
-        qDebug() << "非Windows系统，尝试执行关机命令";
-        emit shutdownStarted();
-        bool success = executeShutdownCommand("");
-        if (success) {
-            qDebug() << "关机命令已发送成功";
-            QTimer::singleShot(3000, []() {
-                QCoreApplication::quit();
-            });
-        } else {
-            qWarning() << "关机命令执行失败";
-            emit shutdownFailed("关机命令执行失败");
-            QCoreApplication::quit();
-        }
-#endif
+        });
     } else {
-        qDebug() << "禁止真实关机，使用正常退出应用";
+        qWarning() << "关机命令执行失败";
+        emit shutdownFailed("关机命令执行失败");
         QCoreApplication::quit();
     }
+#else
+    qDebug() << "非Windows系统，尝试执行关机命令";
+    emit shutdownStarted();
+    bool success = executeShutdownCommand("");
+    if (success) {
+        qDebug() << "关机命令已发送成功";
+        QTimer::singleShot(3000, []() {
+            QCoreApplication::quit();
+        });
+    } else {
+        qWarning() << "关机命令执行失败";
+        emit shutdownFailed("关机命令执行失败");
+        QCoreApplication::quit();
+    }
+#endif
 }
 
 void SystemUtils::rebootWithCommand()
 {
-    bool canRealShutdown = this->canRealShutdown();
-
-    qDebug() << "rebootWithCommand: canRealShutdown =" << canRealShutdown;
-
-    if (canRealShutdown) {
+    qDebug() << "执行重启命令";
 #ifdef Q_OS_WINDOWS
-        emit rebootStarted();
-        bool success = executeRebootCommand();
-        if (success) {
-            qDebug() << "重启命令已发送成功";
-            QTimer::singleShot(3000, []() {
-                QCoreApplication::exit(1);
-            });
-        } else {
-            qWarning() << "重启命令执行失败";
-            emit rebootFailed("重启命令执行失败");
+    emit rebootStarted();
+    bool success = executeRebootCommand();
+    if (success) {
+        qDebug() << "重启命令已发送成功";
+        QTimer::singleShot(3000, []() {
             QCoreApplication::exit(1);
-        }
-#else
-        qDebug() << "非Windows系统，尝试执行重启命令";
-        emit rebootStarted();
-        bool success = executeRebootCommand();
-        if (success) {
-            qDebug() << "重启命令已发送成功";
-            QTimer::singleShot(3000, []() {
-                QCoreApplication::exit(1);
-            });
-        } else {
-            qWarning() << "重启命令执行失败";
-            emit rebootFailed("重启命令执行失败");
-            QCoreApplication::exit(0);
-        }
-#endif
+        });
     } else {
-        qDebug() << "禁止真实重启，使用正常退出应用";
+        qWarning() << "重启命令执行失败";
+        emit rebootFailed("重启命令执行失败");
+        QCoreApplication::exit(1);
+    }
+#else
+    qDebug() << "非Windows系统，尝试执行重启命令";
+    emit rebootStarted();
+    bool success = executeRebootCommand();
+    if (success) {
+        qDebug() << "重启命令已发送成功";
+        QTimer::singleShot(3000, []() {
+            QCoreApplication::exit(1);
+        });
+    } else {
+        qWarning() << "重启命令执行失败";
+        emit rebootFailed("重启命令执行失败");
         QCoreApplication::exit(0);
     }
+#endif
 }
 
 void SystemUtils::normalQuit()

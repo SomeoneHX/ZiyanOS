@@ -5,8 +5,7 @@
 
 VersionManager::VersionManager(QObject *parent)
     : QObject(parent)
-    , m_allowRealShutdown(true)
-    , m_requiresConfirmation(false)
+    , m_showExitButton(false)
 {
     loadConfig();
 }
@@ -38,8 +37,7 @@ void VersionManager::loadConfig()
         m_gitBranch = buildInfo.value("git_branch").toString();
 
         QJsonObject shutdown = root.value("shutdown").toObject();
-        m_allowRealShutdown = shutdown.value("allow_real_shutdown").toBool(true);
-        m_requiresConfirmation = shutdown.value("requires_confirmation").toBool(false);
+        m_showExitButton = shutdown.value("show_exit_button").toBool(false);
 
         m_loaded = true;
         file.close();
@@ -47,7 +45,7 @@ void VersionManager::loadConfig()
         qDebug() << "VersionManager: Loaded config from" << configPath;
         qDebug() << "VersionManager: version =" << m_version
                  << "buildTime =" << m_buildTime
-                 << "allowRealShutdown =" << m_allowRealShutdown;
+                 << "showExitButton =" << m_showExitButton;
         return;
     }
 
@@ -80,14 +78,9 @@ QString VersionManager::buildType() const
     return m_buildType;
 }
 
-bool VersionManager::allowRealShutdown() const
+bool VersionManager::showExitButton() const
 {
-    return m_allowRealShutdown;
-}
-
-bool VersionManager::requiresConfirmation() const
-{
-    return m_requiresConfirmation;
+    return m_showExitButton;
 }
 
 bool VersionManager::isValid() const
